@@ -1,24 +1,20 @@
 <template>
   <nav class="navbar"
-       :class="[ inHotSeat ? 'is-danger' : 'is-black' ]"
+       :class="[ inHotSeat ? 'is-link' : 'is-black' ]"
        role="navigation"
        aria-label="main navigation">
 
-    <div class="navbar-start">
-      <!-- navbar items -->
-      <div class="navbar-item">
-        <p class="small-text">game</p>
-        <h3 class="title is-3">{{game}}</h3>
+    <div class="navbar-center is-hidden-mobile">
+      <div class="navbar-item navbar-first-item">
+        <p class="small-text">player</p>
+        <h3 class="title is-marginless is-paddingless is-4 has-text-light">{{name}}</h3>
       </div>
     </div>
 
-    <div class="navbar-center is-hidden-mobile">
+    <div class="navbar-center">
       <div class="navbar-item">
-        <h3 class="title is-marginless is-paddingless is-4 has-text-light">{{name}}</h3>
-      </div>
-      <div class="navbar-item">
-        <span class="tag is-success is-medium is-rounded">
-          <b>{{score}} pts</b>
+        <span class="crown" v-show="inHotSeat">
+          &#128081;
         </span>
       </div>
     </div>
@@ -35,12 +31,8 @@
 
     <div class="navbar-second-row is-hidden-tablet">
       <div class="navbar-item">
+        <p class="small-text">player</p>
         <h3 class="title is-marginless is-paddingless is-4 has-text-light">{{name}}</h3>
-      </div>
-      <div class="navbar-item">
-        <span class="tag is-success is-medium is-rounded">
-          <b>{{score}} pts</b>
-        </span>
       </div>
     </div>
   </nav>
@@ -73,19 +65,36 @@ export default {
 </script>
 
 <style scoped lang="scss">
-
-  .small-text {
-    font-variant: small-caps;
-    display: block;
-    font-size: 0.75rem;
-    margin-top: 0.25rem;
-    font-weight: bold;
-    line-height: 5;
-    margin-right: 10px;
+  .crown {
+    font-size: 4em;
   }
 
-  .title {
-    line-height: 2;
+  .navbar{
+
+    .navbar-center {
+      flex-grow: 1;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .navbar-item {
+      margin: -15px;
+    }
+
+    .small-text {
+      font-variant: small-caps;
+      display: block;
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      font-weight: bold;
+      line-height: 5;
+      margin-right: 10px;
+      padding-left: 10px;
+    }
+
+    .title {
+      line-height: 2;
+    }
   }
 
   @media screen and (min-width: 100px){

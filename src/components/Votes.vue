@@ -1,0 +1,104 @@
+<template>
+  <div class="hero">
+    <div class="hero-body">
+      <h3 class="title is-2 has-text-centered is-spaced">
+        Rejected Votes
+      </h3>
+      <h3 class="subtitle is-5 has-text-centered is-italic">
+        5 rejected quests and Minions win
+      </h3>
+      <br/>
+      <div class="container">
+        <div class="columns is-mobile">
+          <div class="column is-centered">
+            <div class="votes">
+              <div class="columns is-mobile is-centered">
+                <div class="column is-narrow" v-for="index in 5" :key="index">
+                  <div class="token">
+                    <span class="quest">Quest</span>
+                    <span class="player-count">{{index}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import CircleType from 'circletype';
+
+export default {
+  name: 'steps',
+
+  props: {
+    players: {
+      type: Array,
+      default() {
+        return []
+      }
+    }
+  },
+
+  mounted(){
+    // Instantiate `CircleType` with an HTML element.
+    let quests = document.getElementsByClassName('quest')
+    for(let i = 0; i < quests.length; i++){
+      let circleType = new CircleType(quests[i])
+      circleType.radius(80)
+    }
+    // const circleType = new CircleType(document.getElementsByClassName('quest')[0])
+  },
+
+  data () {
+    return {
+      circles: []
+    }
+  },
+
+  methods: {
+  }
+}
+</script>
+
+<style scoped lang="scss">
+  
+  .title {
+    margin: 20px 0px;
+  }
+
+  .votes {
+
+    .token {
+      border: 1px solid #00000073;
+      border-radius: 50px;
+      background-color: #80808061;
+
+      height: 60px;
+      width: 60px;
+      margin: auto;
+      margin-bottom: 50px;
+      text-align: center;
+
+      position: relative;
+
+      .quest {
+        font-size: .8em;
+        position: absolute;
+        width: 70px;
+        left: -7px;
+        top: -25px;
+      }
+
+      .player-count {
+        display: block;
+        font-size: 2em;
+      }
+    }
+  }
+
+</style>

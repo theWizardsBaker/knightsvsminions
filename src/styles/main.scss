@@ -7,6 +7,7 @@ $modal-card-body-padding: 10px 40px;
 @import "~bulma/sass/base/_all.sass";
 @import "~bulma/sass/grid/_all.sass";
 @import "~bulma/sass/layout/hero.sass";
+@import "~bulma-steps/dist/css/bulma-steps.sass";
 
 // @import "~bulma/sass/components/card.sass";
 @import "~bulma/sass/components/navbar.sass";
@@ -18,5 +19,7 @@ $modal-card-body-padding: 10px 40px;
 @import "~bulma/sass/elements/title.sass";
 @import "~bulma/sass/elements/box.sass";
 @import "~bulma/sass/elements/table.sass";
+@import "~bulma/sass/elements/container.sass";
+@import "~bulma/sass/components/level.sass";
 
 //TweenLite is an extremely fast, lightweight, and flexible animation tool that serves as the foundation of the GreenSock Animation Platform (GSAP). 

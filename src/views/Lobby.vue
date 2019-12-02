@@ -5,21 +5,14 @@
         <!-- main navigation and options menu -->
         <h3 class="subtitle has-text-centered help">game key</h3>
         <h3 class="title is-1 has-text-centered">{{gameKey}}</h3>
-        <div class="paper">
-          <div class="player-list">
-            <div v-for="player, index in playerList">
-              <h3 class="subtitle">
-                <span class="help">{{index + 1}}. </span>
-                {{player}}
-              </h3>
-            </div>
+        <player-list :players="players"/>
+        <br/>
+        <div>
+          <div class="buttons is-centered" v-if="isHost && players.length">
+            <button class="button is-success" @click="startGame">
+              Start Game
+            </button>
           </div>
-          <!-- <img src="../assets/paper.png" /> -->
-        </div>
-        <div v-if="isHost && playerList.length > 4">
-          <button class="button">
-            Start Game
-          </button>
         </div>
       </div>
     </div>
@@ -27,7 +20,7 @@
 </template>
 
 <script>
-
+import PlayerList from '@/components/PlayerList.vue'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -35,43 +28,48 @@ export default {
   name: 'Lobby',
 
   components: {
+    PlayerList
   },
-
 
   data () {
     return {
-      playerList: [
-        "Hilma Quint",
-        "Lillia Hirsh",
-        "Louisa Higley",
-        "Todd Keisler",
-        "Angla Sweeten",
-        "Rufus Stucker",
-        "Nenita Mcelrath",
-        "Madalene Romito",
-        "Kimberely Mcduffie",
-        "Lillia Hirsh",
-        "Louisa Higley",
-        "Todd Keisler",
-        "Angla Sweeten",
-        "Rufus Stucker",
-        "Nenita Mcelrath",
-        "Madalene Romito",
-        "Kimberely Mcduffie",
-        "Lillia Hirsh",
-        "Louisa Higley",
-        "Todd Keisler",
-      ]
+
     }
   },
 
-  computed: {
-    ...mapGetters({
-      gameKey: 'gameKey',
-      players: 'players',
-      isHost: 'isHost'
-    }),
+  watch: {
+    inGame(val) {
+      // if the user is in a game, navigate to the game
+      if(val){
+        this.playGame()
+      }
+    },
   },
+
+  computed: {
+    ...mapGetters([
+      'gameKey',
+      'players',
+      'isHost',
+      'inGame',
+    ]),
+  },
+
+  methods: {
+
+    startGame(){
+      // emit to socket
+      this.$socket.client.emit('begin_game', { gameKey: this.gameKey })
+    },
+
+    playGame(){
+      this.$router.push({
+        name: 'play',
+        params: { gameKey: this.gameKey }
+      })
+    },
+
+  }
 
 }
 
@@ -80,36 +78,5 @@ export default {
 <style scoped lang="scss">
   .gameboard {
     min-height: 100vh;
-    .help {
-      font-variant: small-caps;
-    }
-
-    .paper {
-      position: relative;
-      max-width: 600px;
-      margin: auto;
-      font-family: 'Kaushan Script', cursive;
-      background-image: url('../assets/paper.png');
-      background-repeat: no-repeat;
-      background-attachment: local;
-      background-position: top center;
-      background-size: contain;
-      padding: 50px;
-
-      .player-list {
-        height: 500px;
-        overflow: auto;
-        text-align: center;
-        .subtitle{
-          font-size: 2em;
-          color: black;
-        }
-      }
-      img {
-        display: block;
-        margin: auto;
-        max-height: 900px;
-      }
-    }
   }
 </style>

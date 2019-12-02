@@ -196,7 +196,7 @@ export default {
     playGame(){
       this.$router.push({
         name: 'lobby',
-        params: { gameKey: this.$store.getters.gameKey }
+        params: { gameKey: this.gameKey }
       })
     },
 

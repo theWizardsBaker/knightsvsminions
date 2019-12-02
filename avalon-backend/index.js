@@ -108,10 +108,15 @@ io.on('connection', function (socket){
     }
   });
 
+  socket.on('begin_game', (data) => {
+    io.in(data.gameKey).emit('begin_game')
+  })
+
   // coordinate game state
   socket.on('request_game_state', (data) => {
     socket.to(data.gameKey).emit('send_game_state')
   })
+
 
   socket.on('game_state', (data) => {
     socket.to(data.gameKey).emit('game_state', data)

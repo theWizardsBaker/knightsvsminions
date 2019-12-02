@@ -205,6 +205,14 @@ export default new Vuex.Store({
     //
     // SOCKETS
     //
+    SOCKET_TEST(store){
+      alert('HELLO')
+    },
+
+    SOCKET_BEGIN_GAME(store, data){
+      console.log("GAME HAS BEGUN", data)
+      store.game.connected = true
+    },
 
     SOCKET_REORDER_PLAYERS(store, data){
       store.players.forEach((player) => {
