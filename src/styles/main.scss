@@ -22,4 +22,36 @@ $modal-card-body-padding: 10px 40px;
 @import "~bulma/sass/elements/container.sass";
 @import "~bulma/sass/components/level.sass";
 
+.drop-shadow{
+	text-shadow: 3px 2px 1px rgba(41, 0, 0, 0.5);
+}
+.fancy {
+	font-family: 'Calistoga', cursive;
+	letter-spacing: 4px;
+}
+.fancy-title {
+	font-family: 'Calistoga', cursive;
+	letter-spacing: 4px;
+	color: rgb(198, 142, 55) !important;
+}
+.fancy-subtitle {
+	font-family: 'Cormorant Infant', serif;
+	font-weight: bold;
+	letter-spacing: 1px;
+	color: rgb(198, 142, 55) !important;
+}
+.is-knight-color {
+	color: #305ab6;
+}
+.tag:not(body).is-knight, .is-knight{
+	color: white;
+	background-color: #305ab6;
+}
+.is-minion-color {
+	color: #b62525;
+}
+.tag:not(body).is-minion, .is-minion {
+	color: white;
+	background-color: #b62525;
+}
 //TweenLite is an extremely fast, lightweight, and flexible animation tool that serves as the foundation of the GreenSock Animation Platform (GSAP). 

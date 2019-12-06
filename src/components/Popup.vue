@@ -39,5 +39,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-
+.modal-card {
+  padding: 20px;
+}
 </style>

@@ -63,7 +63,7 @@ export default {
       }
       .subtitle{
         font-size: 2em;
-        color: rgba(60, 74, 133, 1);
+        color: #000021db;
       }
     }
     img {

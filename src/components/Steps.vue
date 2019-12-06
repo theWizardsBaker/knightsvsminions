@@ -1,26 +1,49 @@
 <template>
   <div class="hero">
     <div class="hero-body">
-      <h3 class="title is-2 has-text-centered is-spaced">
+      <h3 class="title is-2 has-text-centered is-spaced fancy-title drop-shadow">
         Grail Quests
       </h3>
       <h3 class="subtitle is-5 is-italic has-text-centered">
-        3 successes - Knights wins <span class="spacer">&nbsp</span> 3 failures - Minions win
+        3 successes - <span class="tag is-medium is-knight fancy drop-shadow">Knights</span> win
+        <span class="spacer is-hidden-mobile">&nbsp</span> 
+        <p class="is-hidden-desktop">
+          <br/>
+        </p>
+        3 failures - <span class="tag is-medium is-minion fancy drop-shadow">Minions</span> win
       </h3>
-      <br/>
       <div class="castle">
         <div class="columns">
-          <div class="column" v-for="index in 5" :key="index">
-            <div class="token">
-              <div class="quest">&nbsp;Quest&nbsp;{{index}}</div>
-              <span class="player-count">4</span>
+          <div class="column" v-for="teamSize, index in teams" :key="index">
+              <div class="token" :class="{ 'current-round': index === currentRound }">
+              <div class="quest">&nbsp;Quest&nbsp;{{index + 1}}</div>
+              <span class="player-count">{{teamSize}}</span>
               <div class="players">Players</div>
-            </div>
-            <div class="tags has-addons are-medium is-centered">
-              <span class="tag is-black">&#128081;</span>
-              <span class="tag is-info">?</span>
+              <span class="fails" v-if="index === 3">2 Fails Required*</span>
             </div>
             <br/>
+            <div v-if="index === currentRound">
+              <div class="isLeader has-text-centered" v-if="isLeader">
+                <button class="button is-gold is-centered is-small is-padded" @click="selectTeam">
+                  Select Team
+                </button>
+              </div>
+              <div class="leader" v-else>
+                <div class="tags has-addons are-medium is-centered">
+                  <span class="tag is-black">&#128081;</span>
+                  <span class="tag is-info">{{leader.name}}</span>
+                </div>
+              </div>
+            </div>
+            <div v-else-if="index < currentRound">
+              <div class="leader">
+                <div class="tags has-addons are-medium is-centered">
+                  <span class="tag is-black">&#128081;</span>
+                  <!-- old leader name -->
+                  <span class="tag is-info">{{leader.name}}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -35,11 +58,25 @@ export default {
   name: 'steps',
 
   props: {
-    players: {
+    currentRound: {
+      type: Number,
+      default: 0
+    },
+    teams: {
       type: Array,
       default() {
         return []
       }
+    },
+    leader: {
+      type: Object,
+      default() {
+        return {}
+      }
+    },
+    isLeader: {
+      type: Boolean,
+      default: true
     }
   },
 
@@ -55,16 +92,30 @@ export default {
       let circleType = new CircleType(players[i])
       circleType.radius(70).dir(-1)
     }
-    // const circleType = new CircleType(document.getElementsByClassName('quest')[0])
+    let circleType = new CircleType(document.getElementsByClassName('fails')[0])
+    circleType.radius(104).dir(-1)
   },
 
   data () {
     return {
-      circles: []
+
     }
   },
 
+  computed: {
+
+  },
+
   methods: {
+
+    selectTeam(){
+      this.$emit('selectTeam')
+    },
+
+    reviewTeam(team){
+      this.$emit('reviewTeam', team)
+    }
+
   }
 }
 </script>
@@ -80,9 +131,35 @@ export default {
     display: inline-block;
   }
 
+  .button.is-gold {
+    font-weight: bold;
+    background-color: #ffa502;
+    border: 3px solid #ffa502;
+    &:hover {
+      background-color: #dad9d6;
+      border: 3px solid #dad9d6;
+    }
+  }
+
+  .button.is-padded {
+    padding: 0px 20px;
+  }
+
   .castle {
 
+    .leader {
+      padding: 10px 0;
+    }
+
     .token {
+
+      &.current-round {
+        border: 2px inset #d35400;
+        color: #ffa502;
+        box-shadow: 0 0 15px #d35400;
+        text-shadow: 0 0 15px #d35400;
+      }
+
       border: 1px solid #00000073;
       border-radius: 50px;
       background-color: #80808061;
@@ -90,28 +167,37 @@ export default {
       height: 100px;
       width: 100px;
       margin: auto;
-      margin-bottom: 50px;
+      margin-top: 50px;
+      margin-bottom: 30px;
       text-align: center;
 
       position: relative;
 
-      .quest, .players {
+
+      .quest, .players, .fails {
         position: absolute;
         width: 70px;
         left: 13px;
       }
 
       .quest {
-        top: -25px;
+        top: -28px;
       }
 
       .players {
-        bottom: -25px;
+        bottom: -28px;
+      }
+
+      .fails {
+        bottom: -50px;
+        left: -3px;
+        width: 100px;
       }
 
       .player-count {
         display: block;
         font-size: 4em;
+        font-weight: bold;
       }
     }
   }

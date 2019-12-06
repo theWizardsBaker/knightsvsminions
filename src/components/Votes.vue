@@ -1,12 +1,13 @@
 <template>
   <div class="hero">
     <div class="hero-body">
-      <h3 class="title is-2 has-text-centered is-spaced">
-        Rejected Votes
+      <h3 class="title is-2 has-text-centered is-spaced fancy-title drop-shadow">
+        Rejected Teams
       </h3>
       <h3 class="subtitle is-5 has-text-centered is-italic">
-        5 rejected quests and Minions win
+        5 rejected teams - <span class="tag is-medium is-minion fancy drop-shadow">Minions</span> win
       </h3>
+      <br/>
       <br/>
       <div class="container">
         <div class="columns is-mobile">
@@ -33,7 +34,7 @@
 import CircleType from 'circletype';
 
 export default {
-  name: 'steps',
+  name: 'votes',
 
   props: {
     players: {
@@ -41,7 +42,8 @@ export default {
       default() {
         return []
       }
-    }
+    },
+
   },
 
   mounted(){
@@ -97,6 +99,7 @@ export default {
       .player-count {
         display: block;
         font-size: 2em;
+        margin-top: 4px;
       }
     }
   }

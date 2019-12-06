@@ -1,10 +1,10 @@
 <template>
   <div class="hero is-dark is-medium">
   	<div class="hero-body">
-  		<h4 class="title is-1 has-text-centered drop-shadow">
-  			Avalon
+  		<h4 class="fancy-title title is-1 has-text-centered drop-shadow ">
+  			Knights <span class="small">vs</span> Minions
   		</h4>
-  		<h4 class="subtitle is-4 has-text-centered drop-shadow">
+  		<h4 class="fancy-subtitle subtitle is-4 has-text-centered drop-shadow">
   			Start a new game or enter a game key to join another player's game
   		</h4>
 	  	<div class="columns is-mobile is-3 is-centered is-multiline">
@@ -15,11 +15,19 @@
 			  	<card :display="option.display">
 
 			  		<template #title>
-			  			<span class="title is-4 has-text-black">{{option.name}}</span>
+              <span class="tag is-medium is-knight fancy drop-shadow" 
+                    v-if="option.type === 'knight'">
+                {{option.name}}
+              </span>
+              <span class="tag is-medium is-minion fancy drop-shadow"
+                    v-if="option.type === 'minion'">
+                {{option.name}}
+              </span>
+			  			<!-- <span class="title is-4 has-text-black"></span> -->
 			  		</template>
 
 			  		<template #content>
-			  			{{option.text}}
+			  			<!-- {{option.text}} -->
 			  		</template>
 
 			  		<template #footer>
@@ -110,6 +118,7 @@ export default {
           error: false,
           display: false,
 		    	userName: '',
+          type: 'knight'
         },
         {
           name: 'Join Game',
@@ -119,6 +128,7 @@ export default {
           display: false,
         	gameKey: '',
 		    	userName: '',
+          type: 'minion'
         },
       ]
     }
@@ -214,18 +224,11 @@ export default {
 <style scoped lang="scss">
   .hero {
 		min-height: 100vh;
-  	&.is-dark .title {
-      font-family: 'Calistoga', cursive;
-      color: rgb(198, 142, 55);
-  	}
-    &.is-dark .subtitle {
-      font-family: 'Cormorant Infant', serif;
-      font-weight: 700;
-      color: rgb(198, 142, 55);
+
+    .small {
+      font-size: .7em;
     }
-    .drop-shadow{
-      text-shadow: 3px 2px 1px rgba(41, 0, 0, 0.5);
-    }
+
   	.spacer {
   		height: 80px;
   	}

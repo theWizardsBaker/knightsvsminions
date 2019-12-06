@@ -1,69 +1,145 @@
 <template>
   <div class="gameboard hero is-dark">
-    <div v-if="loaded">
-      <!-- main navigation and options menu -->
-      <navbar :name="player.name"
-              :inHotSeat="$store.getters.inHotSeat"
-              >
-        <template #bar-end>
-          <div class="buttons">
-            <button class="button is-medium"
-                    :class="{ 'is-light': popup.show, 'is-dark': !popup.show }"
-                    @click="popup.show = true; popup.showMenu = true">
-              <span class="icon">
-                <i class="fa fa-gear" aria-hidden="true"></i>
-              </span>
-            </button>
-            <button class="button is-medium"
-                    :class="{ 'is-light': display.playerlist, 'is-dark': !display.playerlist }" 
-                    @click="display.playerlist = !display.playerlist">
-              <span class="icon">
-                <i class="fa fa-bars" aria-hidden="true"></i>
-              </span>
-            </button>
-          </div>
-        </template>
-      </navbar>
+    <!-- main navigation and options menu -->
+    <navbar :name="player.name"
+            :leader="isLeader"
+            >
+      <template #bar-end>
+        <div class="buttons">
+          <button class="button is-medium"
+                  :class="{ 'is-light': popup.show, 'is-dark': !popup.show }"
+                  @click="popup.show = true; popup.showMenu = true">
+            <span class="icon">
+              <i class="fa fa-gear" aria-hidden="true"></i>
+            </span>
+          </button>
+<!--             <button class="button is-medium"
+                  :class="{ 'is-light': display.playerlist, 'is-dark': !display.playerlist }" 
+                  @click="display.playerlist = !display.playerlist">
+            <span class="icon">
+              <i class="fa fa-bars" aria-hidden="true"></i>
+            </span>
+          </button> -->
+        </div>
+      </template>
+    </navbar>
 
-      <div class="game container">
-        <div class="game-display">
-          <div class="columns">
-            <div class="column" >
-<!--               <br/>
-              <nav class="level">
-                <div class="level-item has-text-centered">
-                  <div>
-                    <p class="heading">Leader</p>
-                    <p class="title is-2">Justin</p>
+    <!-- show the game actions -->
+    <titlebar :title="currentStage.directions.title"
+              :text="currentStage.directions.text"
+              :showButton="(isLeader && !!currentStage.button)"
+              :button="currentStage.button"
+              :loading="display.loading"
+              @continue="titlebarClick"
+              />
+
+    <!-- pop up helper -->
+    <popup :display="popup.show" @close="popupClose">
+      <!-- options menu -->
+      <option-menu :options="game.options"
+                   @optionClick="handleOptionClick"
+                   v-if="popup.showMenu">
+        <template #title>Options</template>
+      </option-menu>
+      <div class="section" v-else-if="popup.allegiance">
+        <div class="is-centered has-text-centered container" 
+             @mousedown="display.allegiance = true" 
+             @mouseup="display.allegiance = false">
+          <h3 class="title is-4 tag is-black">Press and Hold to Flip</h3>
+          <div class="columns is-centered is-mobile">
+            <div class="column is-narrow">
+              <card :display="display.allegiance">
+                <template #title>
+                  <span class="tag is-medium is-knight fancy drop-shadow" v-if="allegiance">{{role.name}}</span>
+                  <span class="tag is-medium is-minion fancy drop-shadow" v-else>{{role.name}}</span>
+                </template>
+                <template #content>
+                  <p class="fancy" v-if="allegiance">
+                    Loyal to the Round Table
+                  </p>
+                  <p class="fancy" v-else>
+                    Disloyal to the Round Table
+                  </p>
+                  <div v-if="!allegiance || role.name === 'Merlin'">
+                    <br/>
+                    <div class="cohorts" v-if="role.name === 'Merlin'">Minions</div>
+                    <div class="cohorts" v-else>cohorts</div>
+                    <ul class="minion-list">
+                      <li v-for="minion in minions">
+                        <span class="fancy">{{minion.name}}</span>
+                      </li>
+                    </ul>
                   </div>
-                </div>
-                <div class="level-item has-text-centered">
-                  <div>
-                    <p class="heading">Quest</p>
-                    <p class="title is-2">1</p>
-                  </div>
-                </div>
-              </nav> -->
-              <steps />
-              <votes />
+                </template>
+              </card>
             </div>
-            <!-- scoreboards -->
-            <transition name="slide-right">
-              <div class="column is-5-desktop is-6-tablet is-hidden-mobile is-hidden-touch playerlist" 
-                   v-show="display.playerlist">
-                <player-list :players="players" />
-              </div>
-            </transition>
-            <transition name="slide-right">
-              <div class="is-hidden-desktop floating-playerlist playerlist" v-show="display.playerlist">
-                <player-list :players="players"/>
-              </div>
-            </transition>
           </div>
         </div>
       </div>
+      <div class="section" v-else-if="popup.selectTeam">
+        <article class="panel is-primary">
+          <p class="panel-heading has-text-weight-bold has-text-centered">
+            Select a Team
+          </p>
+          <a class="panel-block is-link"
+             v-for="player in players"
+             @click="selectPlayer(player)"
+             :diabled="!teamSelection">
+            <span class="panel-icon">
+              <i class="fa"
+                 aria-hidden="true"
+                 :class="[ player.selected ? 'fa-check-square' : 'fa-square-o' ]"
+                 >
+              </i>
+            </span>
+            {{player.name}}
+          </a>
+          <a class="panel-block">
+            <button class="button is-fullwidth" :class="{ 'is-success': teamSelection }" :disabled="!teamSelection">
+              Select Team
+            </button>
+          </a>
+        </article>
+      </div>
+      <div class="section" v-else-if="popup.vote">
+        <h3 class="title">
+          {{leader.name}}
+        </h3>
+        <h3 class="subtitle">
+          Mission {{game.round + 1}}
+        </h3>
+        <player-list :players="questi"/>
+      </div>
+    </popup>
 
+
+    <div class="game">
+      <div class="game-display">
+        <div class="columns">
+          <div class="column" >
+            <steps :leader="leader"
+                   :teams="teamSize"
+                   @selectTeam="selectTeam"
+                   />
+            <votes />
+          </div>
+          <!-- scoreboards -->
+          <transition name="slide-right">
+            <div class="column is-5-desktop is-6-tablet is-hidden-mobile is-hidden-touch playerlist"
+                 v-show="display.playerlist">
+              <player-list :players="players" />
+            </div>
+          </transition>
+          <transition name="slide-right">
+            <div class="is-hidden-desktop floating-playerlist playerlist" v-show="display.playerlist">
+              <player-list :players="players"/>
+            </div>
+          </transition>
+        </div>
+      </div>
     </div>
+
+
   </div>
 </template>
 
@@ -71,17 +147,12 @@
 import Popup from '@/components/Popup'
 import Navbar from '@/components/Navbar'
 import Titlebar from '@/components/Titlebar'
-import Questions from '@/views/game/Questions'
-import Question from '@/views/game/Question'
-import AnswersCompleted from '@/views/game/AnswersCompleted'
-import Answers from '@/views/game/Answers'
-import Answer from '@/views/game/Answer'
-import PlayerOrder from '@/views/game/PlayerOrder'
 import OptionMenu from '@/components/OptionMenu'
 import ConfirmBox from '@/components/ConfirmBox'
 import Steps from '@/components/Steps'
 import Votes from '@/components/Votes'
 import PlayerList from '@/components/PlayerList'
+import Card from '@/components/Card'
 
 import { mapState, mapGetters, mapActions } from 'vuex'
 
@@ -90,16 +161,11 @@ export default {
   name: 'Play',
 
   components: {
+    Card,
   	Navbar,
     Popup,
     Titlebar,
-    Questions,
-    Question,
-    Answer,
-    Answers,
-    AnswersCompleted,
     OptionMenu,
-    PlayerOrder,
     ConfirmBox,
     Steps,
     PlayerList,
@@ -112,120 +178,75 @@ export default {
 
     // reset everything
     this.game.round = 0
-    this.game.stage = 0
-
-    this.display.playerlist = false
-    this.display.hideQuestion = false
-    this.display.questionHistory = false
-    this.display.answerQuestion = false
-    this.display.revealQuestion = false
-    this.display.answer = false
-    this.display.answers = false
-    this.display.adjudicateAnswers = false
-    this.display.selectAnswers = false
-    this.display.revealAuthors = false
-    this.display.score = false
     this.display.endgame = false
     this.display.loading = false
-
-
-    if(this.isHost){
-      // if we're the host, just load
-      this.loaded = true
-    } else {
-      // if we're the client, ask the host what the state is
-      this.$socket.client.emit('request_game_state', { gameKey: this.gameKey })
-      this.setDisplay()
-    }
 
   },
 
   data () {
     return {
 
-      loaded: false,
-
       display: {
-        playerlist: false,
-        hideQuestion: false,
-        questionHistory: false,
-
-        answerQuestion: false,
-        revealQuestion: false,
-
-        answer: false,
-        answers: false,
-
-        adjudicateAnswers: false,
-        selectAnswers: false,
-        revealAuthors: false,
-
-        score: false,
         endgame: false,
-        correctAnswer: false,
-        loading: false
+        loading: false,
+        allegiance: false
       },
 
       popup: {
-        show: false,
-        scoring: false,
+        show: true,
         showMenu: false,
-        confirmQuit: false,
-        reorderPlayers: false,
-        playerScore: false,
+        allegiance: true
       },
 
       game: {
-
-        endGameScore: 10,
 
         round: 0,
 
         stage: 0,
 
+        quests: [],
+
+        questTeamSize: [
+          [2,3,2,3,3], //5 players
+          [2,3,4,3,4], //6
+          [2,3,3,4,4], //7
+          [3,4,4,5,5], //8
+          [3,4,4,5,5], //9
+          [3,4,4,5,5], //10
+          [4,5,5,6,6], //11
+          [4,5,5,6,6], //12
+        ],
+
         stages: [
           {
-            name: 'enterHotSeat',
+            name: 'selectTeam',
             directions: {
-              title: "Draw",
-              text: "Player in the Hot Seat selects and reads a card"
+              title: "Select",
+              text: "The Leader selects a team"
             },
             display: {
-              correctAnswer: false,
-              revealQuestion: false,
-              answerQuestion: false,
-              answer: false,
-              revealPicks: false,
-              revealAuthors: false,
-              score: false,
+
             },
-            scrollTo: 'question'
           },
           {
-            name: 'answerQuestion',
+            name: 'vote',
             directions: {
-              title: "Answer",
-              text: "Write an answer to the Hot Seat card from the perspective of the player in the Hot Seat"
+              title: "Vote",
+              text: "Approve or Reject the Leader's team"
             },
             display: {
-              revealQuestion: true,
-              answerQuestion: false,
-              answer: true,
-              answers: true
+
             },
-            scrollTo: 'answer'
           },
           {
-            name: 'read',
+            name: 'quest',
             directions: {
               title: "Read",
               text: "The player in the Hot Seat reads all of the answers out loud",
               hotseat: "Mark matching or duplicate answers"
             },
             display: {
-              revealQuestion: true,
-              answers: false,
-              adjudicateAnswers: true,
+
             },
             button: {
               text: 'Continue',
@@ -233,55 +254,14 @@ export default {
             }
           },
           {
-            name: 'vote',
+            name: 'reveal',
             directions: {
               title: "Guess",
               text: "Select which answer you think was written by the player in the Hot Seat",
             },
             display: {
-              revealQuestion: true,
-              answers: false,
-              selectAnswers: true,
-              adjudicateAnswers: false,
+
             },
-          },
-          {
-            name: 'revealPicks',
-            directions: {
-              title: "Reveal Picks",
-              text: "Selections for each answer are revealed"
-            },
-            display: {
-              revealQuestion: true,
-              answers: false,
-              adjudicateAnswers: false,
-              revealPicks: true,
-              selectAnswers: false
-            },
-            button: {
-              text: "Reveal Authors",
-              action: 'revealAuthors'
-            }
-          },
-          {
-            name: 'revealAuthors',
-            directions: {
-              title: "Reveal",
-              text: "The player in the Hot Seat's answer is revealed"
-            },
-            display: {
-              revealQuestion: true,
-              answers: false,
-              selectAnswers: false,
-              adjudicateAnswers: false,
-              revealPicks: true,
-              revealAuthors: true,
-              selectAnswers: false
-            },
-            button: {
-              text: "Score Answers",
-              action: 'scoreAnswers'
-            }
           },
           {
             name: 'score',
@@ -290,39 +270,21 @@ export default {
               text: "Recieve points for your answer"
             },
             display: {
-              revealQuestion: true,
-              score: true,
-              revealPicks: true,
-              revealAuthors: true,
-              answerQuestion: false
+
             }
           }
         ],
 
         options: [
           {
-            text: 'Toggle Question Display',
-            icon: 'fa-eye-slash',
-            action: 'hide-questions',
-            hotseat: false,
-          },
-          {
-            text: 'Select Player Order',
-            icon: 'fa-users',
-            action: 'reorder',
-            hotseat: true,
-          },
-          {
-            text: 'Scoring Points',
-            icon: 'fa-sort-numeric-asc',
+            text: 'Game Rules',
+            icon: 'fa-book',
             action: 'scoring',
-            hotseat: false,
           },
           {
-            text: 'Quit Game',
-            icon: 'fa-times-circle',
-            action: 'quit',
-            hotseat: false
+            text: 'Check Allegiance',
+            icon: 'fa-user',
+            action: 'allegiance',
           }
         ],
 
@@ -336,15 +298,6 @@ export default {
       this.setDisplay()
     },
 
-    loaded: {
-      immediate: true,
-      handler(val){
-        // if(!val){
-          this.$emit('toggleLoading')
-        // }
-      }
-    },
-
     connected: {
       immediate: true,
       handler(val){
@@ -354,28 +307,9 @@ export default {
       }
     },
 
-    players(){
-      if(this.game.stage <= 1){
-        this.activatePlayers()
-      }
-      if(this.game.round === 0 && this.game.stage === 0){
-        this.startRound()
-      }
-    },
-
-    inHotSeat: {
-      immediate: true,
-      handler(){
-        this.startRound()
-      }
-    },
-
     'game.stage': {
       immediate: true,
       handler(val){
-        if(val <= 1){
-          this.activatePlayers()
-        }
         if(val === 0){
           // this.startRound()
           this.checkEndGame()
@@ -383,62 +317,28 @@ export default {
       }
     },
 
-    answersRemaining(val){
-      if(val === 0){
-        this.advanceStage()
-      }
-    },
-
-    // answerPicksRemaining(val){
-    //   if(val === 0 && this.currentStage.name === 'vote'){
-    //     this.advanceStage()
-    //   }
-    // },
-
-    synced: {
-      immediate: true,
-      handler(val, val2){
-        if(!this.loaded && val){
-          this.loaded = val
-        }
-      }
-    },
-
-    'display.score'(val){
-      if(val && !this.player.spectator){
-        this.popup.playerScore = true
-        this.popup.show = true
-      }
-    },
-
   },
 
   computed: {
+
     // get the states from the store
     ...mapState({
-      user: ({user}) => user,
-      connected: ({game}) => game.connected,
-      questions: ({questions}) => questions,
+      minPlayers: ({game})=> game.minPlayers,
+      maxPlayers: ({game})=> game.maxPlayers,
     }),
 
-    ...mapGetters({
-      synced: 'synced',
-      isHost: 'isHost',
-      player: 'player',
-      answers: 'answers',
-      gameKey: 'gameKey',
-      inHotSeat: 'inHotSeat',
-      players: 'players',
-      gameWinner: 'gameWinner',
-      hotSeatPlayer: 'hotSeatPlayer',
-      currentQuestion: 'currentQuestion',
-      answersRemaining: 'answersRemaining',
-    }),
-
-    answer(){
-      let answer = this.answers.find((answer) => answer.player.userId === this.player.userId)
-      return answer || {}
-    },
+    ...mapGetters([
+      'isHost',
+      'player',
+      'leader',
+      'gameKey',
+      'players',
+      'isLeader',
+      'connected',
+      'allegiance',
+      'role',
+      'quest'
+    ]),
 
     playerInfo(){
       if(!!this.player){
@@ -451,82 +351,66 @@ export default {
 
     currentStage(){
       return this.game.stages[this.game.stage]
+    },
+
+    minions() {
+      return this.players.filter(player => !player.role.alignment)
+    },
+
+    knights() {
+      return this.players.filter(player => player.role.alignment)
+    },
+
+    teamSize() {
+      return this.game.questTeamSize[this.players.length - this.minPlayers]
+    },
+
+    teamSelection(){
+      return this.teamSize[this.game.round] === this.players.filter(player => player.selected).length
     }
 
   },
 
   sockets: {
 
-    question_added(){
-      this.display.revealQuestion = true
-      this.advanceStage()
-    },
-
-    answers_adjudicated(data){
-      this.delay(1700).then(() => {
-        if(data.correct.length > 0 || data.duplicates.length === this.answers){
-          // if we have correct answers or all duplicates, just go to the reveal
-          let index = this.game.stages.findIndex((stage) => stage.name === 'revealAuthors')
-          index = index - this.game.stage
-          this.advanceStage(index)
-          this.display.revealPicks = false
-          this.display.correctAnswer = true
-        } else {
-          // otherwise, go on
-          this.advanceStage()
-        }
-      })
-    },
-
-    authors_revealed(){
-      this.advanceStage()
-    },
-
-    answers_scored(){
-      // tut up
-      this.computeScores()
-      this.delay(1000).then(() => {
-        // first show scores
-        this.advanceStage()
-        // wait a sec
-        // well, not a second, but jsut a figure of speech
-        this.delay(1500).then(() => {
-          // then go to new round
-          this.advanceStage()
-        })
-      })
-    },
-
-    // player_joined(){
-    //   if(this.game.stage <= 1){
-    //     this.activatePlayers()
-    //   }
-    // }
-
   },
 
   methods: {
 
     ...mapActions([
-      'activatePlayers',
       'incrementRound',
-      'incrementStage',
-      'nextHotSeat',
-      'computeScores',
-      'quitGame',
       'endGame'
     ]),
 
-    setDisplay(){
-      if(this.player.active || this.player.spectator){
-        console.log(this.currentStage)
-        // set loading to false every time
-        this.display.loading = false
-        // hide all display elements
-        for (const [key, value] of Object.entries(this.currentStage.display)) {
-          this.display[key] = value
-        }
+    // setDisplay(){
+    //   if(this.player.active || this.player.spectator){
+    //     // set loading to false every time
+    //     this.display.loading = false
+    //     // hide all display elements
+    //     for (const [key, value] of Object.entries(this.currentStage.display)) {
+    //       this.display[key] = value
+    //     }
+    //   }
+    // },
+
+    selectTeam() {
+      this.popup.show = true
+      this.popup.selectTeam = true
+    },
+
+    selectPlayer(player) {
+      if(!this.teamSelection || player.selected){
+        this.$store.dispatch('playerSelect', player.userId)
       }
+    },
+
+    sendSelections(){
+      // data: {
+        // leader: user,
+        // team: [],
+      // }
+      // emit to socket
+      this.$socket.client.emit('submit_team', data)
     },
 
     leaving(){
@@ -534,7 +418,7 @@ export default {
     },
 
     startRound(){
-      if(this.players.length > 1 && this.inHotSeat){
+      if(this.players.length > 1 && this.isLeader){
         this.delay(800).then(() => {
           this.display.revealQuestion = true
           this.display.answerQuestion = true
@@ -548,16 +432,7 @@ export default {
     },
 
     checkEndGame(){
-      // this.display.endgame = this.players.some((player) => player.score >= this.game.endGameScore)
       return false
-    },
-
-    scoreAnswers() {
-      this.$socket.client.emit('score_answers', { gameKey: this.gameKey })
-    },
-
-    revealAuthors(){
-      this.$socket.client.emit('reveal_authors', { gameKey: this.gameKey })
     },
 
     finishAdjudicate(){
@@ -585,20 +460,6 @@ export default {
       })
     },
 
-    removeExtraPoints(){
-      this.answers.forEach((answer) => this.$set(answer, 'extraPoints', false))
-    },
-
-    markDuplicate(answer){
-      this.removeExtraPoints()
-      this.$set(answer, 'duplicate', !(!!answer.duplicate))
-    },
-
-    correctChoice(answer){
-      this.removeExtraPoints()
-      this.$set(answer, 'correct', !(!!answer.correct))
-    },
-
     extraPoints(answer){
       let extraPoints = !!answer.extraPoints
       // remove all
@@ -613,26 +474,6 @@ export default {
         answer: answer,
         player: this.playerInfo
       })
-    },
-
-    submitAnswer(answerText){
-      let answer = {
-        player: this.playerInfo,
-        answer: answerText
-      }
-      this.$socket.client.emit('add_answer', { gameKey: this.gameKey, answer: answer })
-    },
-
-    submitQuestion(question){
-
-      this.$set(question, 'hotSeatPlayer', this.playerInfo)
-
-      this.$socket.client.emit('add_question', { gameKey: this.gameKey, question: question })
-
-    },
-
-    reorderPlayers(playerOrder){
-      this.$socket.client.emit('reorder_players', { gameKey: this.gameKey, playerOrder: playerOrder })
     },
 
     advanceStage(increment = 1){
@@ -652,25 +493,16 @@ export default {
       this.popup.show = false
       this.popup.showMenu = false
       this.popup.playerScore = false
+      this.popup.allegiance = false
+      this.popup.selectTeam = false
     },
 
     handleOptionClick(action){
       // set point maximum
       switch(action){
-        case 'hide-questions':
-          this.display.hideQuestion = !this.display.hideQuestion
-        break;
-        case 'reorder':
-          this.popup.reorderPlayers = true
+        case 'allegiance':
           this.popup.showMenu = false
-        break;
-        case 'quit':
-          this.popup.confirmQuit = true
-          this.popup.showMenu = false
-        break;
-        case 'scoring':
-          this.popup.scoring = true
-          this.popup.showMenu = false
+          this.popup.allegiance = true
         break;
       }
 
@@ -728,6 +560,18 @@ export default {
     }
   }
 
+  .cohorts {
+    font-variant: small-caps;
+    font-weight: bold;
+    padding-bottom: 5px;
+  }
+
+  .minion-list {
+    font-weight: bold;
+    font-color: black;
+    font-size: 1.2em;
+  }
+
   .gameboard {
     /*min-width: 100vw;*/
     position: relative;
@@ -738,10 +582,13 @@ export default {
     flex-direction: column;
 
     .game {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
+
+      padding: 0 4em;
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+
       .game-display {
 
         .section {

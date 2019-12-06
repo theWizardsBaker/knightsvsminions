@@ -49,7 +49,6 @@ io.on('connection', function (socket){
   //
 
   socket.on('create_game', (data, callback) => {
-    console.log('created')
     // create unique room key
     let gameKey = generateId()
     // create unique user id
@@ -109,7 +108,7 @@ io.on('connection', function (socket){
   });
 
   socket.on('begin_game', (data) => {
-    io.in(data.gameKey).emit('begin_game')
+    io.in(data.gameKey).emit('begin_game', data)
   })
 
   // coordinate game state
