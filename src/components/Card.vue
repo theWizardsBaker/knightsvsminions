@@ -1,9 +1,17 @@
 <template>
   <div class="card-container">
-    <div class="card">
+    <div class="card"  @click="handleClick()">
       <div class="card-inner" :class="{ flip: display }" >
         <div class="box card-front">
           <div class="playing-card-outline" >
+            <div class="selection" v-show="selected">
+              <span class="icon is-large">
+                <span class="fa-stack fa-3x">
+                  <i class="fa fa-circle fa-stack-2x has-text-black"></i>
+                  <i class="fa fa-stack-1x has-text-white fa-check"></i>
+                </span>
+              </span>
+            </div>
             <h4 class="title is-5 has-text-dark" >
               <slot name="title"></slot>
             </h4>
@@ -38,12 +46,25 @@ export default {
     alignment: {
       type: String,
       default: null
+    },
+    select: {
+      type: Boolean,
+      default: false
     }
   },
 
   data () {
     return {
+      selected: false
+    }
+  },
 
+  methods: {
+    handleClick(){
+      if(this.select){
+        this.$emit('clicked')
+        this.selected = !this.selected
+      }
     }
   }
 
@@ -59,6 +80,13 @@ export default {
             perspective: 1000;
 
     .card {
+
+      &.selectable {
+/*        opacity: 0.4;
+        filter: alpha(opacity=40);*/
+
+      }
+
 
       .card-inner {
         text-align: center;
@@ -84,6 +112,14 @@ export default {
              -moz-transform: rotateY(180deg);
                   transform: rotateY(180deg);
         }
+
+        .selection {
+          position: absolute;
+          top: 40%;
+          left: 31%;
+        }
+
+
 
         .card-front {
         /*        -webkit-backface-visibility: visible;

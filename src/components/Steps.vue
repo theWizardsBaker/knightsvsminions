@@ -13,9 +13,9 @@
         3 failures - <span class="tag is-medium is-minion fancy drop-shadow">Minions</span> win
       </h3>
       <div class="castle">
-        <div class="columns">
-          <div class="column" v-for="teamSize, index in teams" :key="index">
-              <div class="token" :class="{ 'current-round': index === currentRound }">
+        <div class="columns is-multiline is-centered is-mobile">
+          <div class="column is-auto-desktop is-4-tablet is-6-mobile" v-for="teamSize, index in teams" :key="index">
+            <div class="token" :class="{ 'current-round': index === currentRound }" @click="selectTeam(index)">
               <div class="quest">&nbsp;Quest&nbsp;{{index + 1}}</div>
               <span class="player-count">{{teamSize}}</span>
               <div class="players">Players</div>
@@ -24,7 +24,7 @@
             <br/>
             <div v-if="index === currentRound">
               <div class="isLeader has-text-centered" v-if="isLeader">
-                <button class="button is-gold is-centered is-small is-padded" @click="selectTeam">
+                <button class="button is-gold is-centered is-small is-padded" @click="selectTeam(index)">
                   Select Team
                 </button>
               </div>
@@ -108,13 +108,15 @@ export default {
 
   methods: {
 
-    selectTeam(){
-      this.$emit('selectTeam')
+    selectTeam(round){
+      if(this.isLeader){
+        this.$emit('selectTeam')
+      } else {
+        if(this.currentRound < round){
+          this.$emit('teamHistory')
+        }
+      }
     },
-
-    reviewTeam(team){
-      this.$emit('reviewTeam', team)
-    }
 
   }
 }

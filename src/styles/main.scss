@@ -1,6 +1,6 @@
 
-$modal-background-background-color: rgba(0, 0, 0, 0.4);
-$modal-content-width: (100% / 2);
+$modal-background-background-color: rgba(0, 0, 0, 0.8);
+$modal-content-width: (100% / 1.5);
 $modal-card-body-padding: 10px 40px;
 
 @import "~bulma/sass/utilities/_all.sass";
@@ -21,6 +21,13 @@ $modal-card-body-padding: 10px 40px;
 @import "~bulma/sass/elements/table.sass";
 @import "~bulma/sass/elements/container.sass";
 @import "~bulma/sass/components/level.sass";
+
+.column.is-auto-desktop {
+  @include desktop {
+    width: auto;
+    flex: 1 1 0;
+  }
+}
 
 .drop-shadow{
 	text-shadow: 3px 2px 1px rgba(41, 0, 0, 0.5);

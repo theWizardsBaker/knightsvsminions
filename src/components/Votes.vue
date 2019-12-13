@@ -15,15 +15,14 @@
             <div class="votes">
               <div class="columns is-mobile is-centered">
                 <div class="column is-narrow" v-for="index in 5" :key="index">
-                  <div class="token">
+                  <div class="token" :class="{ 'is-rejected': rejected[index - 1] }">
                     <span class="quest">Quest</span>
-                    <span class="player-count">{{index}}</span>
+                    <span class="player-count" v-if="!rejected[index - 1]">{{index}}</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -37,7 +36,7 @@ export default {
   name: 'votes',
 
   props: {
-    players: {
+    rejected: {
       type: Array,
       default() {
         return []
@@ -87,6 +86,10 @@ export default {
       text-align: center;
 
       position: relative;
+
+      &.is-rejected {
+        background-color: #b62525;
+      }
 
       .quest {
         font-size: .8em;

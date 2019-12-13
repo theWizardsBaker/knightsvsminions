@@ -10,7 +10,6 @@ export default new Vuex.Store({
   	 	key: null,
    		host: false,
       connected: false,
-      round: 0,
       leader: 0,
       minPlayers: 5,
       maxPlayers: 12,
@@ -21,8 +20,6 @@ export default new Vuex.Store({
   	},
 
 	  players: [],
-
-    quests: [],
 
   },
 
@@ -50,8 +47,6 @@ export default new Vuex.Store({
 
     allegiance: (store, { player }) => player.role.alignment,
 
-    quest: ({quests, game}) => quests[game.round]
-
   },
 
   mutations: {
@@ -66,7 +61,6 @@ export default new Vuex.Store({
         host: data.host,
         key: data.player.gameKey,
         connected: data.connected,
-        round: 0,
         leader: 0,
         minPlayers: 5,
         maxPlayers: 12
@@ -81,11 +75,16 @@ export default new Vuex.Store({
       store.questions = []
     },
 
+    CLEAR_PLAYER_SELECT(store){
+      store.players.forEach(player => {
+        Vue.set(player, 'selected', false)
+      })
+    },
+
     SELECT_PLAYER(store, userId){
       store.players.forEach(player => {
         if(player.userId === userId){
           Vue.set(player, 'selected', !player.selected)
-          console.log(player)
         }
       })
     },
@@ -110,7 +109,6 @@ export default new Vuex.Store({
         key: null,
         host: false,
         connected: false,
-        round: 0,
         leader: 0,
         minPlayers: 5,
         maxPlayers: 12,
@@ -144,7 +142,6 @@ export default new Vuex.Store({
       if(game.host){
         this._vm.$socket.client.emit('game_state', {
           players: players,
-          round: game.round,
           leader: game.leader,
           gameKey: game.key,
         });
@@ -155,10 +152,6 @@ export default new Vuex.Store({
       if(!store.game.host){
         store.players = data.players
       }
-    },
-
-    SOCKET_NEW_ROUND(store) {
-      store.game.round++
     },
 
   },
@@ -174,16 +167,16 @@ export default new Vuex.Store({
       commit('START_GAME', { player: data, host: false, connected: false })
     },
 
-    nextRound({commit}){
-      commit('INCREMENT_ROUND')
-    },
-
-    nextLeader({commit}){
-      commit('NEXT_LEADER')
+    clearPlayerSelections({commit}){
+      commit('CLEAR_PLAYER_SELECT')
     },
 
     playerSelect({commit}, userId){
       commit('SELECT_PLAYER', userId)
+    },
+
+    nextLeader({commit}){
+      commit('NEXT_LEADER')
     },
 
     quitGame({commit}){

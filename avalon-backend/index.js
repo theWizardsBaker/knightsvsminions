@@ -116,17 +116,34 @@ io.on('connection', function (socket){
     socket.to(data.gameKey).emit('send_game_state')
   })
 
-
   socket.on('game_state', (data) => {
     socket.to(data.gameKey).emit('game_state', data)
   })
 
+  socket.on('submit_team', (data) => {
+    io.in(data.gameKey).emit('team_selected', data)
+  })
+
+  socket.on('vote', (data) => {
+    io.in(data.gameKey).emit('player_vote', data)
+  })
+
+  socket.on('reveal_picks', (data) => {
+    io.in(data.gameKey).emit('picks_revealed')
+  })
+
+  socket.on('team_result', (data) => {
+    io.in(data.gameKey).emit('team_vote', data)
+  })
+
+
+
+
+
+
+
   socket.on('activate_player', (data) => {
     io.in(data.gameKey).emit('player_activate', data);
-  });
-
-  socket.on('reorder_players', (data) => {
-    io.in(data.gameKey).emit('reorder_players', data);
   });
 
   // quit the game

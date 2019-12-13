@@ -1,5 +1,8 @@
 <template>
   <div class="paper">
+    <div>
+      <slot></slot>
+    </div>
     <div class="player-list">
       <div v-for="player, index in players">
         <h3 class="subtitle">
@@ -18,12 +21,6 @@ export default {
 
   props: {
     'players': Array,
-    'hotSeatPlayer': {
-      type: Object,
-      default(){
-        return { userId: '' }
-      }
-    },
     'fullHeight': {
       type: Boolean,
       default: true
@@ -42,6 +39,7 @@ export default {
   .paper {
     position: relative;
     max-width: 600px;
+    max-height: 80vh;
     margin: auto;
     font-family: 'Kaushan Script', cursive;
     background-image: url('../assets/paper.png');
@@ -49,12 +47,14 @@ export default {
     background-attachment: local;
     background-position: top center;
     background-size: contain;
-    padding: 50px;
+    padding: 30px;
+
 
     .help {
       font-variant: small-caps;
     }
     .player-list {
+      padding-top: 10px;
       height: 500px;
       overflow: auto;
       text-align: center;

@@ -6,7 +6,7 @@
         <slot></slot>
       </section>
     </div>
-    <button class="modal-close is-large" aria-label="close" @click="emitClose"></button>
+    <button class="modal-close is-large" aria-label="close" @click="emitClose" v-if="closeable"></button>
   </div>
 
 </template>
@@ -20,6 +20,10 @@ export default {
     display:{
       type: Boolean,
       default: false
+    },
+    closeable: {
+      type: Boolean,
+      default: true
     }
   },
 

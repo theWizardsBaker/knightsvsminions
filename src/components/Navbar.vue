@@ -1,6 +1,6 @@
 <template>
   <nav class="navbar"
-       :class="[ inHotSeat ? 'is-link' : 'is-black' ]"
+       :class="[ leader ? 'is-link' : 'is-black' ]"
        role="navigation"
        aria-label="main navigation">
 
@@ -13,7 +13,7 @@
 
     <div class="navbar-center">
       <div class="navbar-item">
-        <span class="crown" v-show="inHotSeat">
+        <span class="crown" v-show="leader">
           &#128081;
         </span>
       </div>
@@ -47,7 +47,7 @@ export default {
     'name',
     'score',
     'showScoreBoard',
-    'inHotSeat'
+    'leader'
   ],
 
   data () {

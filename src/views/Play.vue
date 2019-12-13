@@ -13,13 +13,6 @@
               <i class="fa fa-gear" aria-hidden="true"></i>
             </span>
           </button>
-<!--             <button class="button is-medium"
-                  :class="{ 'is-light': display.playerlist, 'is-dark': !display.playerlist }" 
-                  @click="display.playerlist = !display.playerlist">
-            <span class="icon">
-              <i class="fa fa-bars" aria-hidden="true"></i>
-            </span>
-          </button> -->
         </div>
       </template>
     </navbar>
@@ -34,7 +27,7 @@
               />
 
     <!-- pop up helper -->
-    <popup :display="popup.show" @close="popupClose">
+    <popup :display="popup.show" @close="popupClose" :closeable="popup.closeable">
       <!-- options menu -->
       <option-menu :options="game.options"
                    @optionClick="handleOptionClick"
@@ -79,7 +72,7 @@
       <div class="section" v-else-if="popup.selectTeam">
         <article class="panel is-primary">
           <p class="panel-heading has-text-weight-bold has-text-centered">
-            Select a Team
+            Select {{teamSize[game.round]}} Players
           </p>
           <a class="panel-block is-link"
              v-for="player in players"
@@ -95,20 +88,137 @@
             {{player.name}}
           </a>
           <a class="panel-block">
-            <button class="button is-fullwidth" :class="{ 'is-success': teamSelection }" :disabled="!teamSelection">
-              Select Team
+            <button class="button is-fullwidth"
+                    :class="{ 'is-success': teamSelection, 'is-loading' : game.submittedSelections }"
+                    :disabled="!teamSelection || game.submittedSelections"
+                    @click="sendSelections"
+                    >
+              Create Team
             </button>
           </a>
         </article>
       </div>
       <div class="section" v-else-if="popup.vote">
-        <h3 class="title">
-          {{leader.name}}
+        <div class="player-list-vote">
+          <player-list :players="currentQuest.team">
+            <h3 class="title is-2 has-text-centered has-text-black">
+              &#128081; {{leader.name}}
+            </h3>
+            <h3 class="subtitle is-4 has-text-centered has-text-black quest-vote-list">
+              Quest {{game.round + 1}}
+            </h3>
+          </player-list>
+        </div>
+        <br/>
+        <div class="columns is-centered is-mobile" v-if="!isLeader">
+          <div class="column has-text-centered is-3-desktop is-5-mobile">
+            <button class="button is-danger is-large"
+                    :class="{ 'is-disabled': !display.vote }"
+                    :disabled="!display.vote"
+                    @click="vote(false)">
+              <span class="icon">
+                <i class="fa fa-close" aria-hidden="true"></i>
+              </span>
+              <span>Reject</span>
+            </button>
+          </div>
+          <div class="column has-text-centered is-3-desktop is-5-mobile">
+            <button class="button is-large is-success"
+                    :class="{ 'is-disabled': !display.vote }"
+                    :disabled="!display.vote"
+                    @click="vote(true)">
+              <span class="icon">
+                <i class="fa fa-check" aria-hidden="true"></i>
+              </span>
+              <span>Approve</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="section" v-else-if="popup.votereveal">
+        <h3 class="title is-2 fancy has-text-centered"
+            :class="[this.currentQuest.reject ? 'has-text-danger' : 'has-text-success']"
+            :style="{visibility: (this.currentQuest.reject === true || this.currentQuest.reject === false) ? 'visible' : 'hidden'}">
+          {{!!this.currentQuest.reject ? 'Rejected' : 'Approved'}}
         </h3>
-        <h3 class="subtitle">
-          Mission {{game.round + 1}}
-        </h3>
-        <player-list :players="questi"/>
+        <div class="columns is-multiline is-mobile">
+          <div class="column is-3-desktop is-4-mobile" v-for="vote in currentQuest.vote">
+            <vote-card :display="vote.display">
+              <div class="token has-text-centered" >
+                <span class="icon is-large">
+                  <span class="fa-stack fa-2x">
+                    <i class="fa fa-circle fa-stack-2x"
+                       :class="[vote.vote ? 'has-text-success' : 'has-text-danger']"></i>
+                    <i class="fa fa-stack-1x has-text-white"
+                       :class="[vote.vote ? 'fa-check' : 'fa-close']"></i>
+                  </span>
+                </span>
+                <br/>
+                <span class="has-text-weight-bold">{{vote.vote ? 'Approve' : 'Reject'}}</span>
+              </div>
+            </vote-card>
+          </div>
+        </div>
+        <div class="has-text-centered" v-if="!isLeader">
+          <button class="button is-medium" 
+                  :style="{
+                    visibility: (display.picks && (this.currentQuest.reject === true || this.currentQuest.reject === false)) ? 'visible' : 'hidden' }"
+                  @click="voteTally()">
+            <span>Continue</span>
+            <span class="icon">
+              <i class="fa fa-chevron-right"></i>
+            </span>
+          </button>
+        </div>
+        <div class="has-text-centered" v-if="!isLeader">
+          <button class="button is-medium" :style="{ visibility: !display.revealing  ? 'visible' : 'hidden' }" @click="revealPicks()">
+            Reveal Picks
+          </button>
+        </div>
+      </div>
+      <div class="section" v-else-if="popup.quest">
+        <div v-if="onQuest">
+          <h3 class="title is-3 fancy-title has-text-centered">
+            Quest Success
+          </h3>
+          <div class="columns is-centered is-mobile">
+            <div class="column is-narrow" v-for="decision in ['success', 'fail']">
+              <card :display="true" :select="true">
+                <template #title>
+                  <span class="tag is-medium fancy drop-shadow" 
+                        :class="[decision === 'success' ? 'is-success' : 'is-danger' ]">
+                    <template v-if="decision === 'success'">
+                      Success
+                    </template>
+                    <template v-else>
+                      Fail
+                    </template>
+                  </span>
+                </template>
+                <template #content>
+                  <div>
+                    <img v-if="decision === 'success'"
+                         class="image"
+                         src="../assets/grail-cup-success.png" />
+                    <img v-else
+                         class="image"
+                         src="../assets/grail-cup-fail.png" />
+                  </div>
+                </template>
+              </card>
+            </div>
+          </div>
+          <div class="has-text-centered">
+            <button class="button is-medium">
+              Submit Quest Result
+            </button>
+          </div>
+        </div>
+        <div v-else>
+          <h3 class="title is-2 fancy-title">
+            Quest in Progress
+          </h3>
+        </div>
       </div>
     </popup>
 
@@ -120,21 +230,10 @@
             <steps :leader="leader"
                    :teams="teamSize"
                    @selectTeam="selectTeam"
+                   @teamHistory="teamHistory"
                    />
-            <votes />
+            <votes :rejected="currentQuest.rejected"/>
           </div>
-          <!-- scoreboards -->
-          <transition name="slide-right">
-            <div class="column is-5-desktop is-6-tablet is-hidden-mobile is-hidden-touch playerlist"
-                 v-show="display.playerlist">
-              <player-list :players="players" />
-            </div>
-          </transition>
-          <transition name="slide-right">
-            <div class="is-hidden-desktop floating-playerlist playerlist" v-show="display.playerlist">
-              <player-list :players="players"/>
-            </div>
-          </transition>
         </div>
       </div>
     </div>
@@ -153,6 +252,7 @@ import Steps from '@/components/Steps'
 import Votes from '@/components/Votes'
 import PlayerList from '@/components/PlayerList'
 import Card from '@/components/Card'
+import VoteCard from '@/components/VoteCard'
 
 import { mapState, mapGetters, mapActions } from 'vuex'
 
@@ -170,17 +270,17 @@ export default {
     Steps,
     PlayerList,
     Votes,
+    VoteCard,
   },
 
   created(){
 
     window.addEventListener('beforeunload', this.leaving)
-
+// 
     // reset everything
-    this.game.round = 0
-    this.display.endgame = false
-    this.display.loading = false
-
+    // this.advanceStage()
+    this.popup.show = true
+    this.popup.allegiance = true
   },
 
   data () {
@@ -188,14 +288,22 @@ export default {
 
       display: {
         endgame: false,
-        loading: false,
-        allegiance: false
+        allegiance: false,
+        vote: false,
+        picks: false,
+        voteResults: false,
+        revealing: false,
       },
 
       popup: {
         show: true,
         showMenu: false,
-        allegiance: true
+        allegiance: true,
+        selectTeam: false,
+        vote: false,
+        votereveal: false,
+        closeable: true,
+        quest: false
       },
 
       game: {
@@ -204,7 +312,47 @@ export default {
 
         stage: 0,
 
-        quests: [],
+
+
+        quests: [
+          {
+            team: [],
+            rejected: [],
+            vote: [],
+            success: null,
+            reject: null
+          },
+          {
+            team: [],
+            rejected: [],
+            vote: [],
+            success: null,
+            reject: null
+          },
+          {
+            team: [],
+            rejected: [],
+            vote: [],
+            success: null,
+            reject: null
+          },
+          {
+            team: [],
+            rejected: [],
+            vote: [],
+            success: null,
+            reject: null
+          },
+          {
+            team: [],
+            rejected: [],
+            vote: [],
+            success: null,
+            reject: null
+          }
+        ],
+
+        submittedSelections: false,
 
         questTeamSize: [
           [2,3,2,3,3], //5 players
@@ -225,7 +373,11 @@ export default {
               text: "The Leader selects a team"
             },
             display: {
-
+              popup: {
+                show: false,
+                allegiance: false,
+                closeable: true
+              }
             },
           },
           {
@@ -235,32 +387,49 @@ export default {
               text: "Approve or Reject the Leader's team"
             },
             display: {
-
+              vote: true,
+              popup: {
+                selectTeam: false,
+                allegiance: false,
+                vote: true,
+                closeable: false
+              }
             },
+          },
+          {
+            name: 'reveal-vote',
+            directions: {
+              title: "Results",
+              text: "Results of the vote"
+            },
+            display: {
+              revealing: false,
+              vote: false,
+              popup: {
+                vote: false,
+                votereveal: true
+              }
+            }
           },
           {
             name: 'quest',
             directions: {
-              title: "Read",
-              text: "The player in the Hot Seat reads all of the answers out loud",
-              hotseat: "Mark matching or duplicate answers"
+              title: "Quest",
+              text: "The team embarks on the quest",
             },
             display: {
-
+              popup: {
+                quest: true
+              }
             },
-            button: {
-              text: 'Continue',
-              action: 'finishAdjudicate'
-            }
           },
           {
-            name: 'reveal',
+            name: 'reveal-quest',
             directions: {
-              title: "Guess",
-              text: "Select which answer you think was written by the player in the Hot Seat",
+              title: "Quest Reveal",
+              text: "Results of the quest",
             },
             display: {
-
             },
           },
           {
@@ -307,15 +476,17 @@ export default {
       }
     },
 
-    'game.stage': {
-      immediate: true,
-      handler(val){
-        if(val === 0){
-          // this.startRound()
-          this.checkEndGame()
-        }
+    'currentQuest.vote'(val, oldVal) {
+      if(val.length === 1 && this.popup.vote){
+        // add fake votes for testing
+        val.push({ player: 'gil_123', vote: false})
+        val.push({ player: 'gil_123', vote: false})
+        val.push({ player: 'gil_123', vote: true})
+        val.push({ player: 'gil_123', vote: true})
+        val.push({ player: 'gil_123', vote: false})
+        this.advanceStage()
       }
-    },
+    }
 
   },
 
@@ -337,7 +508,6 @@ export default {
       'connected',
       'allegiance',
       'role',
-      'quest'
     ]),
 
     playerInfo(){
@@ -367,11 +537,65 @@ export default {
 
     teamSelection(){
       return this.teamSize[this.game.round] === this.players.filter(player => player.selected).length
+    },
+
+    currentQuest(){
+      return this.game.quests[this.game.round]
+    },
+
+    onQuest(){
+      return true
     }
 
   },
 
   sockets: {
+
+    team_selected(data){
+      this.$set(this.currentQuest, 'team', data.team)
+      this.advanceStage()
+    },
+
+    player_vote(data){
+      this.$set(this.currentQuest.vote, this.currentQuest.vote.length, {
+        player: data.player,
+        vote: data.decision
+      })
+    },
+
+    picks_revealed(){
+      // set up a nice delay in card flips
+      for(let i = 0; i < this.currentQuest.vote.length; i++){
+        this.delay(200 + (i * 800)).then(() => {
+          this.$set(this.currentQuest.vote[i], 'display', true)
+        })
+      }
+      // delay the result
+      this.delay(200 + (this.currentQuest.vote.length * 1000)).then(() => {
+        // do this for the leader
+        this.display.picks = true
+        this.tallyVoteResutls()
+      })
+    },
+
+    team_vote(data){
+      if(data.rejected){
+        this.currentQuest.rejected.push({
+          leader: this.leader,
+          team: this.currentQuest.team,
+        })
+        let reject = JSON.parse(JSON.stringify(this.currentQuest.rejected))
+        // reset
+        this.startRound()
+        // add the rejected
+        this.currentQuest.rejected = reject
+        // reset stage
+        this.advanceStage(1, true)
+      } else {
+        // move forward with the mission
+        this.advanceStage()
+      }
+    },
 
   },
 
@@ -379,23 +603,47 @@ export default {
 
     ...mapActions([
       'incrementRound',
-      'endGame'
+      'endGame',
+      'nextLeader'
     ]),
 
-    // setDisplay(){
-    //   if(this.player.active || this.player.spectator){
-    //     // set loading to false every time
-    //     this.display.loading = false
-    //     // hide all display elements
-    //     for (const [key, value] of Object.entries(this.currentStage.display)) {
-    //       this.display[key] = value
-    //     }
-    //   }
-    // },
+    teamHistory(){
+
+    },
+
+    startRound(){
+      // reset the quests
+      this.$set(this.game.quests, this.game.round, {
+        team: [],
+        rejected: [],
+        vote: [],
+        success: null,
+        reject: null
+      })
+      // restart submittingSelections
+      this.game.submittedSelections = false
+      // next leader
+      this.nextLeader()
+    },
+
+    setDisplay(){
+      // hide all display elements
+      for (const [key, value] of Object.entries(this.currentStage.display)) {
+        if(key === 'popup'){
+          for (const [popup_key, popup_value] of Object.entries(this.currentStage.display.popup)) {
+            this.popup[popup_key] = popup_value
+          }
+        } else {
+          this.display[key] = value
+        }
+      }
+    },
 
     selectTeam() {
-      this.popup.show = true
-      this.popup.selectTeam = true
+      this.$store.dispatch('clearPlayerSelections')
+      this.$set(this.popup, 'show', true)
+      this.$set(this.popup, 'selectTeam', true)
+      this.$set(this.popup, 'closeable', true)
     },
 
     selectPlayer(player) {
@@ -405,25 +653,48 @@ export default {
     },
 
     sendSelections(){
-      // data: {
-        // leader: user,
-        // team: [],
-      // }
+      this.game.submittedSelections = true
       // emit to socket
-      this.$socket.client.emit('submit_team', data)
+      this.$socket.client.emit('submit_team', {
+        gameKey: this.gameKey,
+        team: this.players.filter(player => player.selected)
+      })
+    },
+
+    vote(decision){
+      if(this.display.vote){
+        this.$socket.client.emit('vote', {
+          gameKey: this.gameKey,
+          player: this.player.userId,
+          decision: decision
+        })
+          this.display.vote = false
+      }
+    },
+
+    revealPicks() {
+      this.display.revealing = true
+      this.$socket.client.emit('reveal_picks', {
+        gameKey: this.gameKey
+      })
+    },
+
+    tallyVoteResutls(){
+      let successes = this.currentQuest.vote.filter(vote => vote.vote)
+      this.currentQuest.reject = !(successes.length > (this.currentQuest.vote.length - successes.length))
+    },
+
+    voteTally() {
+      this.display.picks = false
+      // go back and get a new leader
+      this.$socket.client.emit('team_result', {
+        gameKey: this.gameKey,
+        rejected: this.currentQuest.reject
+      })
     },
 
     leaving(){
-      this.quitGame()
-    },
-
-    startRound(){
-      if(this.players.length > 1 && this.isLeader){
-        this.delay(800).then(() => {
-          this.display.revealQuestion = true
-          this.display.answerQuestion = true
-        })
-      }
+      // this.quitGame()
     },
 
     titlebarClick(){
@@ -431,70 +702,39 @@ export default {
       this[this.currentStage.button.action]()
     },
 
-    checkEndGame(){
-      return false
-    },
+    // submitSelectedAnswer(answer){
+    //   this.$socket.client.emit('select_answer', {
+    //     gameKey: this.gameKey,
+    //     answer: answer,
+    //     player: this.playerInfo
+    //   })
+    // },
 
-    finishAdjudicate(){
-      let correct = []
-      let duplicates = []
-      let extraPoints = null
-
-      this.currentQuestion.answers.forEach((answer) => {
-        if(!!answer.correct){
-          correct.push(answer.player.userId)
-        }
-        if(!!answer.duplicate){
-          duplicates.push(answer.player.userId)
-        }
-        if(!!answer.extraPoints){
-          extraPoints = answer.player.userId
-        }
-      })
-      // find a correct answer -- if there is one
-      this.$socket.client.emit('adjudicate_answers', {
-        gameKey: this.gameKey,
-        correct: correct,
-        duplicates: duplicates,
-        extraPoints: extraPoints
-      })
-    },
-
-    extraPoints(answer){
-      let extraPoints = !!answer.extraPoints
-      // remove all
-      this.removeExtraPoints()
-      // set
-      this.$set(answer, 'extraPoints', !extraPoints)
-    },
-
-    submitSelectedAnswer(answer){
-      this.$socket.client.emit('select_answer', {
-        gameKey: this.gameKey,
-        answer: answer,
-        player: this.playerInfo
-      })
-    },
-
-    advanceStage(increment = 1){
-      let len = this.game.stages.length
+    advanceRound(increment = 1){
+      let len = this.game.quests.length
       if(this.game.stage === len - 1){
-        if(this.isHost){
-          this.$socket.client.emit('advance_round', { gameKey: this.gameKey })
-        }
-        this.game.stage = 0
+        // end game
       } else {
-        this.incrementStage(increment)
+        this.game.round += increment
+      }
+    },
+
+    advanceStage(increment = 1, restart = false){
+      let len = this.game.stages.length
+      if(this.game.stage === len - 1 || restart){
+       this.game.stage = 0
+      } else {
         this.game.stage += increment
       }
     },
 
+
     popupClose(){
-      this.popup.show = false
-      this.popup.showMenu = false
-      this.popup.playerScore = false
-      this.popup.allegiance = false
-      this.popup.selectTeam = false
+      if(this.popup.closeable){
+        for(let pop in this.popup){
+          this.popup[pop] = false
+        }
+      }
     },
 
     handleOptionClick(action){
@@ -502,6 +742,7 @@ export default {
       switch(action){
         case 'allegiance':
           this.popup.showMenu = false
+          this.popup.closeable = true
           this.popup.allegiance = true
         break;
       }
@@ -523,11 +764,26 @@ export default {
     animation: slideOutRight .4s reverse;
   }
 
+  .token {
+    margin-top: 20px;
+  }
+
+  .player-list-vote {
+    .quest-vote-list {
+      margin: 10px 0;
+    }
+  }
+
   .panel-block {
     background-color: white;
     th {
       white-space: nowrap;
     }
+  }
+
+  .image {
+    padding: 20px;
+    height: 300px;
   }
 
   .score {
