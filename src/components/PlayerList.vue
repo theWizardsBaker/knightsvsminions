@@ -39,7 +39,7 @@ export default {
   .paper {
     position: relative;
     max-width: 600px;
-    max-height: 80vh;
+    max-height: 74vh;
     margin: auto;
     font-family: 'Kaushan Script', cursive;
     background-image: url('../assets/paper.png');

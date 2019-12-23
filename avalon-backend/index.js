@@ -136,52 +136,13 @@ io.on('connection', function (socket){
     io.in(data.gameKey).emit('team_vote', data)
   })
 
-
-
-
-
-
-
-  socket.on('activate_player', (data) => {
-    io.in(data.gameKey).emit('player_activate', data);
-  });
-
-  // quit the game
-  socket.on('quit_game', (data) => {
-    socket.to(data.gameKey).emit('player_quit', data);
-  });
-
-  //
-  // GAME PLAY
-  //
-
-  socket.on('add_question', (data) => {
-    io.in(data.gameKey).emit('question_added', data.question);
-  });
-
-  socket.on('add_answer', (data) => {
-    io.in(data.gameKey).emit('answer_added', data.answer);
-  });
-
-  socket.on('adjudicate_answers', (data) => {
-    io.in(data.gameKey).emit('answers_adjudicated', data)
+  socket.on('submit_quest', (data) => {
+    io.in(data.gameKey).emit('quest_outcome', data)
   })
 
-  socket.on('reveal_authors', (data) => {
-    io.in(data.gameKey).emit('authors_revealed')
+  socket.on('reveal_quest', (data) => {
+    io.in(data.gameKey).emit('quest_reveal', data)
   })
-
-  socket.on('score_answers', (data) => {
-    io.in(data.gameKey).emit('answers_scored')
-  })
-
-  socket.on('advance_round', (data) => {
-    io.in(data.gameKey).emit('new_round')
-  })
-
-  socket.on('select_answer', (data) => {
-    io.in(data.gameKey).emit('answer_selected', { answer: data.answer, player: data.player });
-  });
 
 });
 

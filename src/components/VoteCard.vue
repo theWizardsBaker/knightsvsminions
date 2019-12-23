@@ -9,6 +9,7 @@
         </div>
         <div class="box card-backing" >
           <div class="backing">
+            <img class="branding" src="../assets/small_dragon.svg" />
           </div>
         </div>
       </div>
@@ -143,10 +144,15 @@ export default {
 
         /*vectorlady.com*/
         .card-backing {
-          background-color: darkblue;
+          background-color: #191970;
           -webkit-backface-visibility: hidden;
              -moz-backface-visibility: hidden;
                   backface-visibility: hidden;
+
+          .branding {
+            width: 100%;
+            padding-top: 12px;
+          }
         }
       }
 

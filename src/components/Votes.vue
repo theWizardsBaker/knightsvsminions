@@ -10,14 +10,14 @@
       <br/>
       <br/>
       <div class="container">
-        <div class="columns is-mobile">
+        <div class="columns">
           <div class="column is-centered">
             <div class="votes">
               <div class="columns is-mobile is-centered">
                 <div class="column is-narrow" v-for="index in 5" :key="index">
-                  <div class="token" :class="{ 'is-rejected': rejected[index - 1] }">
+                  <div class="token" :class="[ !!rejected[index - 1] ? 'is-minion' : 'is-neutral' ]">
                     <span class="quest">Quest</span>
-                    <span class="player-count" v-if="!rejected[index - 1]">{{index}}</span>
+                    <span class="player-count fancy drop-shadow" v-if="!!rejected[index - 1]">M</span>
                   </div>
                 </div>
               </div>
@@ -77,7 +77,11 @@ export default {
     .token {
       border: 1px solid #00000073;
       border-radius: 50px;
-      background-color: #80808061;
+
+      &.is-neutral {
+        background-color: #80808061;
+      }
+
 
       height: 60px;
       width: 60px;

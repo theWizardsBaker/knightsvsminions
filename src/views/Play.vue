@@ -8,7 +8,7 @@
         <div class="buttons">
           <button class="button is-medium"
                   :class="{ 'is-light': popup.show, 'is-dark': !popup.show }"
-                  @click="popup.show = true; popup.showMenu = true">
+                  @click="openMenu()">
             <span class="icon">
               <i class="fa fa-gear" aria-hidden="true"></i>
             </span>
@@ -17,23 +17,30 @@
       </template>
     </navbar>
 
-    <!-- show the game actions -->
-    <titlebar :title="currentStage.directions.title"
-              :text="currentStage.directions.text"
-              :showButton="(isLeader && !!currentStage.button)"
-              :button="currentStage.button"
-              :loading="display.loading"
-              @continue="titlebarClick"
-              />
-
     <!-- pop up helper -->
     <popup :display="popup.show" @close="popupClose" :closeable="popup.closeable">
+      <!-- <div style="position: absolute; left: 0">{{currentQuest}}</div> -->
       <!-- options menu -->
       <option-menu :options="game.options"
                    @optionClick="handleOptionClick"
                    v-if="popup.showMenu">
         <template #title>Options</template>
       </option-menu>
+      <div v-else-if="display.endgame" class="container has-text-centered">
+        <h3 class="title is-1 fancy-title has-text-centered" v-if="game.minionWins > game.knightWins">
+          Minions Win!
+        </h3>
+        <div v-else>
+          <h3 class="title is-1 fancy-title has-text-centered">
+            Knights Win!
+          </h3>
+          <h3 class="title is-5 tag is-black has-text-centered">
+            However,
+            <br/>
+            If Minions can guess Merlin, they win...
+          </h3>
+        </div>
+      </div>
       <div class="section" v-else-if="popup.allegiance">
         <div class="is-centered has-text-centered container" 
              @mousedown="display.allegiance = true" 
@@ -110,7 +117,8 @@
           </player-list>
         </div>
         <br/>
-        <div class="columns is-centered is-mobile" v-if="!isLeader">
+        <!-- v-if="!isLeader" -->
+        <div class="columns is-centered is-mobile" >
           <div class="column has-text-centered is-3-desktop is-5-mobile">
             <button class="button is-danger is-large"
                     :class="{ 'is-disabled': !display.vote }"
@@ -159,20 +167,19 @@
             </vote-card>
           </div>
         </div>
-        <div class="has-text-centered" v-if="!isLeader">
+        <!-- v-if="!isLeader" -->
+        <div class="has-text-centered" >
           <button class="button is-medium" 
                   :style="{
                     visibility: (display.picks && (this.currentQuest.reject === true || this.currentQuest.reject === false)) ? 'visible' : 'hidden' }"
                   @click="voteTally()">
-            <span>Continue</span>
-            <span class="icon">
-              <i class="fa fa-chevron-right"></i>
-            </span>
+            Continue
           </button>
         </div>
-        <div class="has-text-centered" v-if="!isLeader">
+        <!-- v-if="!isLeader" -->
+        <div class="has-text-centered" >
           <button class="button is-medium" :style="{ visibility: !display.revealing  ? 'visible' : 'hidden' }" @click="revealPicks()">
-            Reveal Picks
+            Reveal Votes
           </button>
         </div>
       </div>
@@ -183,7 +190,10 @@
           </h3>
           <div class="columns is-centered is-mobile">
             <div class="column is-narrow" v-for="decision in ['success', 'fail']">
-              <card :display="true" :select="true">
+              <card :display="game.quest === decision || game.quest === null" 
+                    :select="true" 
+                    :selected="game.quest === decision"
+                    @selected="game.quest = decision">
                 <template #title>
                   <span class="tag is-medium fancy drop-shadow" 
                         :class="[decision === 'success' ? 'is-success' : 'is-danger' ]">
@@ -209,15 +219,65 @@
             </div>
           </div>
           <div class="has-text-centered">
-            <button class="button is-medium">
-              Submit Quest Result
+            <button class="button is-medium"
+                    :class="{ disabled: game.quest === null }"
+                    :disabled="game.quest === null"
+                    v-show="!display.quest"
+                    @click="saveQuestOutcome()">
+              Continue
             </button>
           </div>
         </div>
         <div v-else>
-          <h3 class="title is-2 fancy-title">
+          <h3 class="title is-3 fancy-title has-text-centered">
             Quest in Progress
           </h3>
+          <div class="columns is-centered is-mobile">
+            <div class="column is-narrow" v-for="team, index in currentQuest.team">
+              <card :display="false" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section" v-else-if="popup.questResults">
+        <h3 class="title is-3 fancy-title has-text-centered">
+          Quest Result
+        </h3>
+        <div class="columns is-centered is-mobile">
+          <div class="column is-narrow" v-for="result, index in currentQuest.results">
+            <card :display="result.reveal">
+                <template #title>
+                  <span class="tag is-medium fancy drop-shadow"
+                        :class="[result.success ? 'is-success' : 'is-danger' ]">
+                    {{ result.success ? 'Success' : 'Fail' }}
+                  </span>
+                </template>
+                <template #content>
+                  <div>
+                    <img v-if="result.success"
+                         class="image"
+                         src="../assets/grail-cup-success.png" />
+                    <img v-else
+                         class="image"
+                         src="../assets/grail-cup-fail.png" />
+                  </div>
+                </template>
+              </card>
+          </div>
+        </div>
+        <div class="has-text-centered" v-if="!isLeader">
+          <button class="button is-medium"
+                  :style="{ visibility: display.questResults  ? 'visible' : 'hidden' }"
+                  v-show="!display.questEnd"
+                  @click="revealQuest()">
+            Reveal Quest
+          </button>
+          <button class="button is-medium"
+                   v-show="display.questEnd"
+                  :style="{ visibility: display.questEnd  ? 'visible' : 'hidden' }"
+                  @click="questResults()">
+            Continue
+          </button>
         </div>
       </div>
     </popup>
@@ -229,6 +289,8 @@
           <div class="column" >
             <steps :leader="leader"
                    :teams="teamSize"
+                   :currentRound="game.round"
+                   :quests="game.quests"
                    @selectTeam="selectTeam"
                    @teamHistory="teamHistory"
                    />
@@ -274,13 +336,24 @@ export default {
   },
 
   created(){
-
     window.addEventListener('beforeunload', this.leaving)
-// 
-    // reset everything
-    // this.advanceStage()
+    document.addEventListener('keyup', (event) => {
+        if (event.keyCode === 27) {
+            // this.popup.show = false;
+            this.popupClose()
+        }
+    });
     this.popup.show = true
     this.popup.allegiance = true
+  },
+
+  beforeDestroy(){
+    window.removeEventListener('beforeunload', this.leaving)
+    document.removeEventListener('keyup', (event) => {
+        if (event.keyCode === 27) {
+            this.popup.show = false;
+        }
+    });
   },
 
   data () {
@@ -293,6 +366,8 @@ export default {
         picks: false,
         voteResults: false,
         revealing: false,
+        quest: false,
+        questResults: false,
       },
 
       popup: {
@@ -303,7 +378,9 @@ export default {
         vote: false,
         votereveal: false,
         closeable: true,
-        quest: false
+        quest: false,
+        questResults: false,
+        questEnd: false,
       },
 
       game: {
@@ -312,41 +389,55 @@ export default {
 
         stage: 0,
 
+        knightWins: 0,
 
+        minionWins: 0,
+
+        quest: null,
 
         quests: [
           {
+            leader: '',
             team: [],
             rejected: [],
             vote: [],
+            results: [],
             success: null,
             reject: null
           },
           {
+            leader: '',
             team: [],
             rejected: [],
             vote: [],
+            results: [],
             success: null,
             reject: null
           },
           {
+            leader: '',
             team: [],
             rejected: [],
             vote: [],
+            results: [],
             success: null,
             reject: null
           },
           {
+            leader: '',
             team: [],
             rejected: [],
             vote: [],
+            results: [],
             success: null,
             reject: null
           },
           {
+            leader: '',
             team: [],
             rejected: [],
             vote: [],
+            results: [],
             success: null,
             reject: null
           }
@@ -373,6 +464,8 @@ export default {
               text: "The Leader selects a team"
             },
             display: {
+              revealing: false,
+              questEnd: false,
               popup: {
                 show: false,
                 allegiance: false,
@@ -419,7 +512,8 @@ export default {
             },
             display: {
               popup: {
-                quest: true
+                quest: true,
+                votereveal: false
               }
             },
           },
@@ -430,18 +524,38 @@ export default {
               text: "Results of the quest",
             },
             display: {
+              quest: false,
+              questResults: true,
+              popup: {
+                quest: false,
+                questResults: true
+              }
             },
           },
           {
-            name: 'score',
+            name: 'quest-tally',
             directions: {
               title: "Score",
-              text: "Recieve points for your answer"
+              text: "Results of the quest",
             },
             display: {
+              questEnd: false,
+              popup: {
+                questResults: false,
+                show: false
+              }
+            },
+          },
+          // {
+          //   name: 'score',
+          //   directions: {
+          //     title: "Score",
+          //     text: "Recieve points for your answer"
+          //   },
+          //   display: {
 
-            }
-          }
+          //   }
+          // }
         ],
 
         options: [
@@ -479,12 +593,24 @@ export default {
     'currentQuest.vote'(val, oldVal) {
       if(val.length === 1 && this.popup.vote){
         // add fake votes for testing
-        val.push({ player: 'gil_123', vote: false})
-        val.push({ player: 'gil_123', vote: false})
         val.push({ player: 'gil_123', vote: true})
-        val.push({ player: 'gil_123', vote: true})
+        val.push({ player: 'gil_123', vote: false})
         val.push({ player: 'gil_123', vote: false})
         this.advanceStage()
+      }
+    },
+
+
+    'currentQuest.results'(val) {
+      try {
+        if(val.length === 1){
+          this.advanceStage()
+        }
+        if(val.length === this.teamSize[this.game.round]){
+          this.advanceStage()
+        }
+      } catch(e){
+        console.log(val, this.teamSize[this.game.round])
       }
     }
 
@@ -545,13 +671,27 @@ export default {
 
     onQuest(){
       return true
-    }
+    },
 
+    isEndGame(){
+      let endGame = false
+      // if minions won by rejection
+      if(this.currentQuest.rejected.length === 5){
+        endGame = true
+      }
+      // if one team won by votes
+      if(this.knightWins >= 3 || this.minionWins >= 3){
+        endGame = true
+      }
+
+      return endGame
+    },
   },
 
   sockets: {
 
     team_selected(data){
+      this.$set(this.currentQuest, 'leader', JSON.parse(JSON.stringify(this.leader)))
       this.$set(this.currentQuest, 'team', data.team)
       this.advanceStage()
     },
@@ -597,33 +737,82 @@ export default {
       }
     },
 
+    quest_outcome(data){
+      this.currentQuest.results.push({
+        success: data.quest === 'success',
+        reveal: false
+      })
+    },
+
+    quest_reveal(data){
+      // delay the result
+      for(let i = 0; i < this.currentQuest.results.length; i++){
+        this.delay(200 + (i * 800)).then(() => {
+          this.$set(this.currentQuest.results[i], 'reveal', true)
+        })
+      }
+      this.display.questResults = false
+      this.display.questEnd = true
+    },
+
   },
 
   methods: {
 
     ...mapActions([
       'incrementRound',
-      'endGame',
       'nextLeader'
     ]),
+
+    questResults(){
+      let questSuccess = this.currentQuest.results.reduce((total, result) => {
+        return (total && result.success)
+      }, true)
+      this.$set(this.currentQuest, 'success', questSuccess)
+      this.advanceStage(1, true)
+    },
+
+    revealQuest(){
+      this.$socket.client.emit('reveal_quest', {
+        gameKey: this.gameKey
+      })
+    },
+
+    saveQuestOutcome(){
+      // emit to socket
+      this.$socket.client.emit('submit_quest', {
+        gameKey: this.gameKey,
+        quest: this.game.quest
+      })
+      this.display.quest = true
+    },
 
     teamHistory(){
 
     },
 
     startRound(){
-      // reset the quests
-      this.$set(this.game.quests, this.game.round, {
-        team: [],
-        rejected: [],
-        vote: [],
-        success: null,
-        reject: null
-      })
-      // restart submittingSelections
-      this.game.submittedSelections = false
-      // next leader
-      this.nextLeader()
+      if(this.isEndGame){
+        this.display.endgame = true 
+        this.popup.show = true
+        this.popup.closeable = false
+      } else {
+        // reset the quests
+        this.$set(this.game.quests, this.game.round, {
+          team: [],
+          rejected: [],
+          vote: [],
+          results: [],
+          success: null,
+          reject: null
+        })
+        // restart submittingSelections
+        this.game.submittedSelections = false
+        // remove the quest
+        this.game.quest = null
+        // next leader
+        this.nextLeader()
+      }
     },
 
     setDisplay(){
@@ -702,29 +891,30 @@ export default {
       this[this.currentStage.button.action]()
     },
 
-    // submitSelectedAnswer(answer){
-    //   this.$socket.client.emit('select_answer', {
-    //     gameKey: this.gameKey,
-    //     answer: answer,
-    //     player: this.playerInfo
-    //   })
-    // },
-
     advanceRound(increment = 1){
-      let len = this.game.quests.length
-      if(this.game.stage === len - 1){
-        // end game
+      if(this.currentQuest.success){
+        this.game.knightWins++
       } else {
+        this.game.minionWins++
+      }
+
+      if(this.game.stage < this.game.quests.length){
         this.game.round += increment
+        this.startRound()
       }
     },
 
     advanceStage(increment = 1, restart = false){
-      let len = this.game.stages.length
-      if(this.game.stage === len - 1 || restart){
-       this.game.stage = 0
-      } else {
-        this.game.stage += increment
+      if(!this.isEndGame){
+        let len = this.game.stages.length
+        if(this.game.stage === len - 1 || restart){
+         this.game.stage = 0
+         if(!restart){
+           this.advanceRound()
+         }
+        } else {
+          this.game.stage += increment
+        }
       }
     },
 
@@ -748,6 +938,12 @@ export default {
       }
 
     },
+
+    openMenu(){
+      this.popup.show = true
+      this.popup.showMenu = true
+      this.popup.closeable = true
+    }
 
   }
 }
@@ -833,8 +1029,6 @@ export default {
     position: relative;
     padding: 0;
     display: flex;
-    height: 100%;
-    min-height: 100vh;
     flex-direction: column;
 
     .game {

@@ -15,16 +15,26 @@
       <div class="castle">
         <div class="columns is-multiline is-centered is-mobile">
           <div class="column is-auto-desktop is-4-tablet is-6-mobile" v-for="teamSize, index in teams" :key="index">
-            <div class="token" :class="{ 'current-round': index === currentRound }" @click="selectTeam(index)">
+            <div class="token"
+                 :class="{
+                  'current-round': index === currentRound,
+                  'is-knight': quests[index].success === true,
+                  'is-minion': quests[index].success === false,
+                  'is-neutral': quests[index].success == null,
+                 }"
+                 @click="selectTeam(index)">
               <div class="quest">&nbsp;Quest&nbsp;{{index + 1}}</div>
-              <span class="player-count">{{teamSize}}</span>
+              <span class="player-count" v-if="quests[index].success === null">{{teamSize}}</span>
+              <span class="player-count fancy drop-shadow" v-else>
+                    {{quests[index].success ? 'K' : 'M'}}
+              </span>
               <div class="players">Players</div>
               <span class="fails" v-if="index === 3">2 Fails Required*</span>
             </div>
             <br/>
             <div v-if="index === currentRound">
-              <div class="isLeader has-text-centered" v-if="isLeader">
-                <button class="button is-gold is-centered is-small is-padded" @click="selectTeam(index)">
+              <div class="isLeader has-text-centered leader" v-if="isLeader">
+                <button class="button is-gold is-centered is-padded" @click="selectTeam(index)">
                   Select Team
                 </button>
               </div>
@@ -40,7 +50,7 @@
                 <div class="tags has-addons are-medium is-centered">
                   <span class="tag is-black">&#128081;</span>
                   <!-- old leader name -->
-                  <span class="tag is-info">{{leader.name}}</span>
+                  <span class="tag is-info">{{quests[index].leader.name}}</span>
                 </div>
               </div>
             </div>
@@ -77,6 +87,12 @@ export default {
     isLeader: {
       type: Boolean,
       default: true
+    },
+    quests: {
+      type: Array,
+      default() {
+        return []
+      }
     }
   },
 
@@ -135,6 +151,7 @@ export default {
 
   .button.is-gold {
     font-weight: bold;
+    font-size: .95em;
     background-color: #ffa502;
     border: 3px solid #ffa502;
     &:hover {
@@ -162,9 +179,13 @@ export default {
         text-shadow: 0 0 15px #d35400;
       }
 
+
       border: 1px solid #00000073;
       border-radius: 50px;
-      background-color: #80808061;
+
+      &.is-neutral {
+        background-color: #80808061;
+      }
 
       height: 100px;
       width: 100px;

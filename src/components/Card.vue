@@ -26,6 +26,7 @@
         </div>
         <div class="box card-backing" >
           <div class="backing">
+            <img class="branding" src="../assets/dragin.svg" />
           </div>
         </div>
       </div>
@@ -50,20 +51,23 @@ export default {
     select: {
       type: Boolean,
       default: false
+    },
+    selected: {
+      type: Boolean,
+      default: false
     }
   },
 
   data () {
     return {
-      selected: false
+
     }
   },
 
   methods: {
     handleClick(){
       if(this.select){
-        this.$emit('clicked')
-        this.selected = !this.selected
+        this.$emit('selected')
       }
     }
   }
@@ -217,10 +221,14 @@ export default {
 
         /*vectorlady.com*/
         .card-backing {
-          background-color: darkblue;
+          background-color: #191970;
                 -webkit-backface-visibility: hidden;
                    -moz-backface-visibility: hidden;
                         backface-visibility: hidden;
+
+          .branding {
+            margin-top: 70px;
+          }
 /*  
           -webkit-transform: rotateY(0);
              -moz-transform: rotateY(0);

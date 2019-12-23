@@ -1,5 +1,5 @@
 
-$modal-background-background-color: rgba(0, 0, 0, 0.8);
+$modal-background-background-color: rgba(0, 0, 0, 0.9);
 $modal-content-width: (100% / 1.5);
 $modal-card-body-padding: 10px 40px;
 
@@ -20,6 +20,7 @@ $modal-card-body-padding: 10px 40px;
 @import "~bulma/sass/elements/box.sass";
 @import "~bulma/sass/elements/table.sass";
 @import "~bulma/sass/elements/container.sass";
+@import "~bulma/sass/layout/section.sass";
 @import "~bulma/sass/components/level.sass";
 
 .column.is-auto-desktop {
@@ -48,14 +49,14 @@ $modal-card-body-padding: 10px 40px;
 	color: rgb(198, 142, 55) !important;
 }
 .is-knight-color {
-	color: #305ab6;
+	color: #305ab6 !important;
 }
 .tag:not(body).is-knight, .is-knight{
 	color: white;
 	background-color: #305ab6;
 }
 .is-minion-color {
-	color: #b62525;
+	color: #b62525 !important;
 }
 .tag:not(body).is-minion, .is-minion {
 	color: white;

@@ -11,9 +11,14 @@
       </div>
     </div>
 
-    <div class="navbar-center">
-      <div class="navbar-item">
-        <span class="crown" v-show="leader">
+    <div class="navbar-center has-text-centered">
+      <div class="navbar-item is-hidden-mobile">
+        <span class="crown-desktop" v-show="leader">
+          &#128081;
+        </span>
+      </div>
+      <div class="is-hidden-tablet">
+        <span class="crown-mobile" v-show="leader">
           &#128081;
         </span>
       </div>
@@ -32,7 +37,7 @@
     <div class="navbar-second-row is-hidden-tablet">
       <div class="navbar-item">
         <p class="small-text">player</p>
-        <h3 class="title is-marginless is-paddingless is-4 has-text-light">{{name}}</h3>
+        <h3 class="title is-padded is-4 has-text-light">{{name}}</h3>
       </div>
     </div>
   </nav>
@@ -65,12 +70,19 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  .crown {
-    font-size: 4em;
+  .crown-desktop {
+    font-size: 3em;
+    position: absolute;
+    left: -30px;
+  }
+  .crown-mobile {
+    font-size: 3em;
+    position: absolute;
+    top: -10px;
   }
 
   .navbar{
-
+    padding: 10px;
     .navbar-center {
       flex-grow: 1;
       flex-direction: column;
@@ -79,6 +91,7 @@ export default {
 
     .navbar-item {
       margin: -15px;
+      position: relative;
     }
 
     .small-text {
@@ -94,6 +107,9 @@ export default {
 
     .title {
       line-height: 2;
+      &.is-padded {
+        padding-top: 7px;
+      }
     }
   }
 
