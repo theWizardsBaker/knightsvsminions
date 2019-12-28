@@ -1,9 +1,12 @@
 // npm install lowdb ???
 // db if needed
 // express app
-const app = require('express')();
+const express = require('express');
+const app = express();
 // http
 const http = require('http').Server(app);
+// require path
+const path = require('path');
 // cross origin requests
 const cors = require('cors');
 app.use(cors({credentials: true, origin: true}))
@@ -13,12 +16,17 @@ const io = require('socket.io')(http, {
   httpCompression: true,
   origins: '*:*',
   pingTimeout: 60000,
+  // resource: '/avalon/socket.io'
 });
 // adding for ability to parse json
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
-// bluebird promise
-const Promise = require('bluebird');
+// create the static app
+const staticApp = express.static(path.join(__dirname, 'dist'))
+// serve the app
+app.use(staticApp)
+
+
 
 
 
@@ -147,6 +155,7 @@ io.on('connection', function (socket){
 });
 
 
-http.listen(8087, '0.0.0.0', () => {
+http.listen(8087, '127.0.0.1', () => {
+// http.listen(8087, '0.0.0.0', () => {
     console.log('Listening on port *: 8087');
 });
