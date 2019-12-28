@@ -26,20 +26,61 @@
                    v-if="popup.showMenu">
         <template #title>Options</template>
       </option-menu>
-      <div v-else-if="display.endgame" class="container has-text-centered">
-        <h3 class="title is-1 fancy-title has-text-centered" v-if="game.minionWins > game.knightWins">
-          Minions Win!
-        </h3>
-        <div v-else>
-          <h3 class="title is-1 fancy-title has-text-centered">
-            Knights Win!
-          </h3>
-          <h3 class="title is-5 tag is-black has-text-centered">
-            However,
-            <br/>
-            If Minions can guess Merlin, they win...
-          </h3>
-        </div>
+      <div class="section" v-else-if="popup.history">
+        <article class="panel is-primary">
+          <player-list :players="game.quests[game.historyRound].team">
+            <h3 class="title is-2 has-text-centered has-text-black">
+              &#128081; {{game.quests[game.historyRound].leader.name}}
+            </h3>
+            <h3 class="subtitle is-4 has-text-centered has-text-black quest-vote-list">
+              Quest {{game.historyRound + 1}}
+            </h3>
+          </player-list>
+        </article>
+      </div>
+      <div class="section" v-else-if="popup.directions">
+        Knights vs Minions
+
+        Overview:
+
+        The game consists of 5 rounds; each round has a team building phase and a Quest phase.
+
+        To begin a round, the leader proposes a team to complete a Quest - all other players will either approve the proposed team and move to the quest phase, or reject the proposed team passing leadership to the next player and repeating the process until a team is approved. In the Quest phase those players selected to be on the team will determine if the Quest is succesfull.
+
+
+        Steps:
+
+        Team Assignment:
+
+        The leader selects the required number of players to form a team. The leader can be on the team, but is not required to be so.
+
+        Team vote:
+
+        After appropriate discussion, all other players will vote on the team composition. The leader can be a Minion, or one (or more) of the other players chosen may be.
+
+        If the team is approved, play continues in the quest phase.
+
+        If the team is rejected (a tied vote is also rejection), a new leader is chosen and the team building phase is repeated.
+
+        Minions wins the game if five teams are rejected in a single round.
+
+
+        Quest Phase:
+
+        Each player on the quest selects a quest card. The quest fails if one or more fail cards are played.
+
+        The good players must select the quest success card. Minions may select either the quest success (Stephanie) or quest fail card.
+
+
+        End of the game:
+
+        The game ends immediately after either 3 succesful or three failed quests. The Minion players win if 3 quests fail or when 5 teams are rejected in a single round.
+
+
+        Assassinate Merlin
+
+        If 3 quests are completed succesfully, the Minion players will have a final opportunity to win the game by correctly naming which of the Knights is Merlin.
+
       </div>
       <div class="section" v-else-if="popup.allegiance">
         <div class="is-centered has-text-centered container" 
@@ -74,6 +115,23 @@
               </card>
             </div>
           </div>
+        </div>
+      </div>
+      <div v-else-if="display.endgame" class="container has-text-centered">
+        <h3 class="title is-1 fancy-title has-text-centered"
+            v-if="this.currentQuest.rejected.length === 5 || game.minionWins > game.knightWins">
+          Minions Win
+        </h3>
+        <div v-else>
+          <h3 class="title is-1 fancy-title has-text-centered">
+            Knights Win
+          </h3>
+          <br/>
+          <h3 class="title is-5 tag is-black has-text-centered">
+            However,
+            <br/>
+            If Minions can guess Merlin, they win...
+          </h3>
         </div>
       </div>
       <div class="section" v-else-if="popup.selectTeam">
@@ -265,7 +323,8 @@
               </card>
           </div>
         </div>
-        <div class="has-text-centered" v-if="!isLeader">
+        <!-- v-if="!isLeader" -->
+        <div class="has-text-centered" >
           <button class="button is-medium"
                   :style="{ visibility: display.questResults  ? 'visible' : 'hidden' }"
                   v-show="!display.questEnd"
@@ -291,6 +350,7 @@
                    :teams="teamSize"
                    :currentRound="game.round"
                    :quests="game.quests"
+                   :doubleFail="doubleFail"
                    @selectTeam="selectTeam"
                    @teamHistory="teamHistory"
                    />
@@ -381,11 +441,14 @@ export default {
         quest: false,
         questResults: false,
         questEnd: false,
+        history: false
       },
 
       game: {
 
         round: 0,
+
+        historyRound: 0,
 
         stage: 0,
 
@@ -546,16 +609,6 @@ export default {
               }
             },
           },
-          // {
-          //   name: 'score',
-          //   directions: {
-          //     title: "Score",
-          //     text: "Recieve points for your answer"
-          //   },
-          //   display: {
-
-          //   }
-          // }
         ],
 
         options: [
@@ -594,7 +647,7 @@ export default {
       if(val.length === 1 && this.popup.vote){
         // add fake votes for testing
         val.push({ player: 'gil_123', vote: true})
-        val.push({ player: 'gil_123', vote: false})
+        val.push({ player: 'gil_123', vote: true})
         val.push({ player: 'gil_123', vote: false})
         this.advanceStage()
       }
@@ -611,6 +664,13 @@ export default {
         }
       } catch(e){
         console.log(val, this.teamSize[this.game.round])
+      }
+    },
+
+    isEndGame(val){
+      if(val){
+        this.popup.show = true
+        this.popup.closeable = true
       }
     }
 
@@ -635,6 +695,10 @@ export default {
       'allegiance',
       'role',
     ]),
+
+    doubleFail(){
+      return this.players.length > 6
+    },
 
     playerInfo(){
       if(!!this.player){
@@ -680,10 +744,9 @@ export default {
         endGame = true
       }
       // if one team won by votes
-      if(this.knightWins >= 3 || this.minionWins >= 3){
+      if(this.game.knightWins >= 3 || this.game.minionWins >= 3){
         endGame = true
       }
-
       return endGame
     },
   },
@@ -765,11 +828,19 @@ export default {
     ]),
 
     questResults(){
-      let questSuccess = this.currentQuest.results.reduce((total, result) => {
-        return (total && result.success)
-      }, true)
-      this.$set(this.currentQuest, 'success', questSuccess)
-      this.advanceStage(1, true)
+      // number of fails
+      let failCount = 0
+      this.currentQuest.results.forEach((result) => {
+        if(!result.success){
+          failCount++
+        }
+      })
+      // check the limit for what counts as a fail
+      let failLimit = (this.doubleFail && game.round === 3) ? 2 : 1
+      // set success
+      this.$set(this.currentQuest, 'success', failCount < failLimit)
+      // move on to the next stage
+      this.advanceStage()
     },
 
     revealQuest(){
@@ -787,11 +858,15 @@ export default {
       this.display.quest = true
     },
 
-    teamHistory(){
-
+    teamHistory(round){
+      this.game.historyRound = round
+      this.popup.history = true
+      this.popup.closeable = true
+      this.popup.show = true
     },
 
     startRound(){
+      // check the endgame
       if(this.isEndGame){
         this.display.endgame = true 
         this.popup.show = true
@@ -907,7 +982,7 @@ export default {
     advanceStage(increment = 1, restart = false){
       if(!this.isEndGame){
         let len = this.game.stages.length
-        if(this.game.stage === len - 1 || restart){
+        if(this.game.stage === len - 2 || restart){
          this.game.stage = 0
          if(!restart){
            this.advanceRound()

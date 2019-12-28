@@ -22,14 +22,14 @@
                   'is-minion': quests[index].success === false,
                   'is-neutral': quests[index].success == null,
                  }"
-                 @click="selectTeam(index)">
+                 @click="teamHistory(index)">
               <div class="quest">&nbsp;Quest&nbsp;{{index + 1}}</div>
               <span class="player-count" v-if="quests[index].success === null">{{teamSize}}</span>
               <span class="player-count fancy drop-shadow" v-else>
                     {{quests[index].success ? 'K' : 'M'}}
               </span>
               <div class="players">Players</div>
-              <span class="fails" v-if="index === 3">2 Fails Required*</span>
+              <span class="fails" v-if="index === 3 && doubleFail">2 Fails Required*</span>
             </div>
             <br/>
             <div v-if="index === currentRound">
@@ -46,7 +46,7 @@
               </div>
             </div>
             <div v-else-if="index < currentRound">
-              <div class="leader">
+              <div class="leader" @click="teamHistory(index)">
                 <div class="tags has-addons are-medium is-centered">
                   <span class="tag is-black">&#128081;</span>
                   <!-- old leader name -->
@@ -93,6 +93,10 @@ export default {
       default() {
         return []
       }
+    },
+    doubleFail: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -108,8 +112,11 @@ export default {
       let circleType = new CircleType(players[i])
       circleType.radius(70).dir(-1)
     }
-    let circleType = new CircleType(document.getElementsByClassName('fails')[0])
-    circleType.radius(104).dir(-1)
+    let fails = document.getElementsByClassName('fails')[0]
+    if(fails){
+      let circleType = new CircleType(fails)
+      circleType.radius(104).dir(-1)
+    }
   },
 
   data () {
@@ -127,12 +134,13 @@ export default {
     selectTeam(round){
       if(this.isLeader){
         this.$emit('selectTeam')
-      } else {
-        if(this.currentRound < round){
-          this.$emit('teamHistory')
-        }
       }
     },
+    teamHistory(round){
+      if(round < this.currentRound){
+        this.$emit('teamHistory', round)
+      }
+    }
 
   }
 }

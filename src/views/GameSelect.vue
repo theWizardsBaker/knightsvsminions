@@ -99,7 +99,7 @@ export default {
   mounted() {
     // set up a nice delay in card flips
   	for(let i = 0; i < this.gameOptions.length; i++){
-	  	this.delay(800 + (i * 300)).then(() => {
+	  	this.delay(1100 + (i * 300)).then(() => {
 		  	this.$set(this.gameOptions[i], 'display', true)
 	  	})
   	}
