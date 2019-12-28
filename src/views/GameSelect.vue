@@ -80,6 +80,11 @@
 	  			{{errorMessage}}
 	  		</h3>
 	  	</div>
+      <footer class="has-text-centered fancy">
+        <br/>
+        <h4 class="subtitle is-3">Beta</h4>
+        <h4 class="subtitle is-6">(This probably won't work well)</h4>
+      </footer>
     </div>
   </div>
 </template>
@@ -232,5 +237,8 @@ export default {
   	.spacer {
   		height: 80px;
   	}
+
+    footer {
+    }
   }
 </style>

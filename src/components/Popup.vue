@@ -45,5 +45,6 @@ export default {
 <style scoped lang="scss">
 .modal-card {
   padding: 20px;
+  overflow-y: auto;
 }
 </style>

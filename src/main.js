@@ -31,12 +31,22 @@ Vue.filter('capitalize', function (value) {
 
 Vue.mixin({
   methods: {
-	delay(time, v){
+  	delay(time, v){
        return new Promise((resolve) => {
            setTimeout(resolve.bind(null, v), time)
        });
     },
-  }
+    shuffle(array){
+      // shuffle
+      for (let i = array.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1))
+        const temp = array[i]
+        array[i] = array[j]
+        array[j] = temp
+      }
+      return array
+    },
+  },
 })
 
 new Vue({

@@ -43,6 +43,8 @@ export default new Vuex.Store({
 
     isLeader: ({user}, { leader }) => leader.userId === user.id,
 
+    // isLeader: ({user}, { leader }) => true,
+
     role: (store, { player }) => player.role,
 
     allegiance: (store, { player }) => player.role.alignment,

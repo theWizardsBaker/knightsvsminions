@@ -86,7 +86,7 @@ export default {
     },
     isLeader: {
       type: Boolean,
-      default: true
+      default: false
     },
     quests: {
       type: Array,

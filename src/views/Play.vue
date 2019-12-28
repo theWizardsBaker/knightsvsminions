@@ -38,49 +38,61 @@
           </player-list>
         </article>
       </div>
-      <div class="section" v-else-if="popup.directions">
-        Knights vs Minions
-
-        Overview:
-
-        The game consists of 5 rounds; each round has a team building phase and a Quest phase.
-
-        To begin a round, the leader proposes a team to complete a Quest - all other players will either approve the proposed team and move to the quest phase, or reject the proposed team passing leadership to the next player and repeating the process until a team is approved. In the Quest phase those players selected to be on the team will determine if the Quest is succesfull.
-
-
-        Steps:
-
-        Team Assignment:
-
-        The leader selects the required number of players to form a team. The leader can be on the team, but is not required to be so.
-
-        Team vote:
-
-        After appropriate discussion, all other players will vote on the team composition. The leader can be a Minion, or one (or more) of the other players chosen may be.
-
-        If the team is approved, play continues in the quest phase.
-
-        If the team is rejected (a tied vote is also rejection), a new leader is chosen and the team building phase is repeated.
-
-        Minions wins the game if five teams are rejected in a single round.
-
-
-        Quest Phase:
-
-        Each player on the quest selects a quest card. The quest fails if one or more fail cards are played.
-
-        The good players must select the quest success card. Minions may select either the quest success (Stephanie) or quest fail card.
-
-
-        End of the game:
-
-        The game ends immediately after either 3 succesful or three failed quests. The Minion players win if 3 quests fail or when 5 teams are rejected in a single round.
-
-
-        Assassinate Merlin
-
-        If 3 quests are completed succesfully, the Minion players will have a final opportunity to win the game by correctly naming which of the Knights is Merlin.
-
+      <div class="section" v-else-if="popup.rules">
+        <h3 class="title fancy drop-shadow is-2 has-text-centered">Knights vs Minions</h3>
+        <div class="container rules">
+          <div class="section">
+            <h4 class="subtitle fancy is-4">Overview</h4>
+            <p>
+              The game consists of 5 rounds; each round has a team building phase and a Quest phase.
+              <br/>
+              <br/>
+              To begin a round, the leader proposes a team to complete a Quest - all other players will either approve the proposed team and move to the quest phase, or reject the proposed team passing leadership to the next player and repeating the process until a team is approved. In the Quest phase those players selected to be on the team will determine if the Quest is succesfull.
+            </p>
+            <br/>
+            <hr/>
+            <h4 class="subtitle fancy is-4">Team Assignment</h4>
+            <p>
+              The leader selects the required number of players to form a team. The leader can be on the team, but is not required to be so.
+            </p>
+            <br/>
+            <hr/>
+            <h4 class="subtitle fancy is-4">Team vote</h4>
+            <p>
+              After appropriate discussion, all other players will vote on the team composition. The leader can be a Minion, or one (or more) of the other players chosen may be.
+              <br/>
+              <br/>
+              If the team is approved, play continues in the quest phase.
+              <br/>
+              <br/>
+              If the team is rejected (a tied vote is also rejection), a new leader is chosen and the team building phase is repeated.
+              <br/>
+              <br/>
+              Minions wins the game if five teams are rejected in a single round.
+            </p>
+            <br/>
+            <hr/>
+            <h4 class="subtitle fancy is-4">Quest Phase</h4>
+            <p>
+              Each player on the quest selects a quest card. The quest fails if one or more fail cards are played.
+              <br/>
+              <br/>
+              The good players must select the quest success card. Minions may select either the quest success (Stephanie) or quest fail card.
+            </p>
+            <br/>
+            <hr/>
+            <h4 class="subtitle fancy is-4">End of the game</h4>
+            <p>
+              The game ends immediately after either 3 succesful or three failed quests. The Minion players win if 3 quests fail or when 5 teams are rejected in a single round.
+            </p>
+            <br/>
+            <hr/>
+            <h4 class="subtitle fancy is-4">Assassinate Merlin</h4>
+            <p>
+              If 3 quests are completed succesfully, the Minion players will have a final opportunity to win the game by correctly naming which of the Knights is Merlin.
+            </p>
+          </div>
+        </div>
       </div>
       <div class="section" v-else-if="popup.allegiance">
         <div class="is-centered has-text-centered container" 
@@ -175,7 +187,6 @@
           </player-list>
         </div>
         <br/>
-        <!-- v-if="!isLeader" -->
         <div class="columns is-centered is-mobile" >
           <div class="column has-text-centered is-3-desktop is-5-mobile">
             <button class="button is-danger is-large"
@@ -207,6 +218,7 @@
             :style="{visibility: (this.currentQuest.reject === true || this.currentQuest.reject === false) ? 'visible' : 'hidden'}">
           {{!!this.currentQuest.reject ? 'Rejected' : 'Approved'}}
         </h3>
+        <br/>
         <div class="columns is-multiline is-mobile">
           <div class="column is-3-desktop is-4-mobile" v-for="vote in currentQuest.vote">
             <vote-card :display="vote.display">
@@ -225,17 +237,15 @@
             </vote-card>
           </div>
         </div>
-        <!-- v-if="!isLeader" -->
-        <div class="has-text-centered" >
-          <button class="button is-medium" 
+        <div class="has-text-centered" v-if="isLeader">
+          <button class="button is-medium"
                   :style="{
                     visibility: (display.picks && (this.currentQuest.reject === true || this.currentQuest.reject === false)) ? 'visible' : 'hidden' }"
                   @click="voteTally()">
             Continue
           </button>
         </div>
-        <!-- v-if="!isLeader" -->
-        <div class="has-text-centered" >
+        <div class="has-text-centered" v-if="isLeader">
           <button class="button is-medium" :style="{ visibility: !display.revealing  ? 'visible' : 'hidden' }" @click="revealPicks()">
             Reveal Votes
           </button>
@@ -246,6 +256,7 @@
           <h3 class="title is-3 fancy-title has-text-centered">
             Quest Success
           </h3>
+          <br/>
           <div class="columns is-centered is-mobile">
             <div class="column is-narrow" v-for="decision in ['success', 'fail']">
               <card :display="game.quest === decision || game.quest === null" 
@@ -276,7 +287,8 @@
               </card>
             </div>
           </div>
-          <div class="has-text-centered">
+          <br/>
+          <div class="has-text-centered" v-if="isLeader">
             <button class="button is-medium"
                     :class="{ disabled: game.quest === null }"
                     :disabled="game.quest === null"
@@ -301,7 +313,8 @@
         <h3 class="title is-3 fancy-title has-text-centered">
           Quest Result
         </h3>
-        <div class="columns is-centered is-mobile">
+        <br/>
+        <div class="columns is-multiline is-centered is-mobile">
           <div class="column is-narrow" v-for="result, index in currentQuest.results">
             <card :display="result.reveal">
                 <template #title>
@@ -323,8 +336,8 @@
               </card>
           </div>
         </div>
-        <!-- v-if="!isLeader" -->
-        <div class="has-text-centered" >
+        <br/>
+        <div class="has-text-centered" v-if="isLeader">
           <button class="button is-medium"
                   :style="{ visibility: display.questResults  ? 'visible' : 'hidden' }"
                   v-show="!display.questEnd"
@@ -347,6 +360,7 @@
         <div class="columns">
           <div class="column" >
             <steps :leader="leader"
+                   :isLeader="isLeader"
                    :teams="teamSize"
                    :currentRound="game.round"
                    :quests="game.quests"
@@ -441,7 +455,8 @@ export default {
         quest: false,
         questResults: false,
         questEnd: false,
-        history: false
+        history: false,
+        rules: false
       },
 
       game: {
@@ -644,12 +659,14 @@ export default {
     },
 
     'currentQuest.vote'(val, oldVal) {
-      if(val.length === 1 && this.popup.vote){
+      if(val.length === this.teamSize[this.game.round] && this.popup.vote){
         // add fake votes for testing
-        val.push({ player: 'gil_123', vote: true})
-        val.push({ player: 'gil_123', vote: true})
-        val.push({ player: 'gil_123', vote: false})
+        // val.push({ player: 'gil_123', vote: true})
+        // val.push({ player: 'gil_123', vote: true})
+        // val.push({ player: 'gil_123', vote: false})
+
         this.advanceStage()
+        this.shuffle(this.currentQuest.vote)
       }
     },
 
@@ -734,7 +751,11 @@ export default {
     },
 
     onQuest(){
-      return true
+      if(this.currentQuest.team.length === this.teamSize[this.game.round]){
+        let player = this.currentQuest.team.some(player => player.userId === this.player.userId)
+        return player
+      }
+      return false
     },
 
     isEndGame(){
@@ -827,6 +848,44 @@ export default {
       'nextLeader'
     ]),
 
+    selectTeam() {
+      this.$store.dispatch('clearPlayerSelections')
+      this.$set(this.popup, 'show', true)
+      this.$set(this.popup, 'selectTeam', true)
+      this.$set(this.popup, 'closeable', true)
+    },
+
+    selectPlayer(player) {
+      if(!this.teamSelection || player.selected){
+        this.$store.dispatch('playerSelect', player.userId)
+      }
+    },
+
+    vote(decision){
+      if(this.display.vote){
+        this.$socket.client.emit('vote', {
+          gameKey: this.gameKey,
+          player: this.player.userId,
+          decision: decision
+        })
+        this.display.vote = false
+      }
+    },
+
+    voteTally() {
+      this.display.picks = false
+      // go back and get a new leader
+      this.$socket.client.emit('team_result', {
+        gameKey: this.gameKey,
+        rejected: this.currentQuest.reject
+      })
+    },
+
+    tallyVoteResutls(){
+      let successes = this.currentQuest.vote.filter(vote => vote.vote)
+      this.currentQuest.reject = !(successes.length > (this.currentQuest.vote.length - successes.length))
+    },
+
     questResults(){
       // number of fails
       let failCount = 0
@@ -865,6 +924,44 @@ export default {
       this.popup.show = true
     },
 
+    setDisplay(){
+      // hide all display elements
+      for (const [key, value] of Object.entries(this.currentStage.display)) {
+        if(key === 'popup'){
+          for (const [popup_key, popup_value] of Object.entries(this.currentStage.display.popup)) {
+            this.popup[popup_key] = popup_value
+          }
+        } else {
+          this.display[key] = value
+        }
+      }
+    },
+
+    sendSelections(){
+      this.game.submittedSelections = true
+      // emit to socket
+      this.$socket.client.emit('submit_team', {
+        gameKey: this.gameKey,
+        team: this.players.filter(player => player.selected)
+      })
+    },
+
+    revealPicks() {
+      this.display.revealing = true
+      this.$socket.client.emit('reveal_picks', {
+        gameKey: this.gameKey
+      })
+    },
+
+    leaving(){
+      // this.quitGame()
+    },
+
+    titlebarClick(){
+      this.display.loading = true
+      this[this.currentStage.button.action]()
+    },
+
     startRound(){
       // check the endgame
       if(this.isEndGame){
@@ -888,82 +985,6 @@ export default {
         // next leader
         this.nextLeader()
       }
-    },
-
-    setDisplay(){
-      // hide all display elements
-      for (const [key, value] of Object.entries(this.currentStage.display)) {
-        if(key === 'popup'){
-          for (const [popup_key, popup_value] of Object.entries(this.currentStage.display.popup)) {
-            this.popup[popup_key] = popup_value
-          }
-        } else {
-          this.display[key] = value
-        }
-      }
-    },
-
-    selectTeam() {
-      this.$store.dispatch('clearPlayerSelections')
-      this.$set(this.popup, 'show', true)
-      this.$set(this.popup, 'selectTeam', true)
-      this.$set(this.popup, 'closeable', true)
-    },
-
-    selectPlayer(player) {
-      if(!this.teamSelection || player.selected){
-        this.$store.dispatch('playerSelect', player.userId)
-      }
-    },
-
-    sendSelections(){
-      this.game.submittedSelections = true
-      // emit to socket
-      this.$socket.client.emit('submit_team', {
-        gameKey: this.gameKey,
-        team: this.players.filter(player => player.selected)
-      })
-    },
-
-    vote(decision){
-      if(this.display.vote){
-        this.$socket.client.emit('vote', {
-          gameKey: this.gameKey,
-          player: this.player.userId,
-          decision: decision
-        })
-          this.display.vote = false
-      }
-    },
-
-    revealPicks() {
-      this.display.revealing = true
-      this.$socket.client.emit('reveal_picks', {
-        gameKey: this.gameKey
-      })
-    },
-
-    tallyVoteResutls(){
-      let successes = this.currentQuest.vote.filter(vote => vote.vote)
-      this.currentQuest.reject = !(successes.length > (this.currentQuest.vote.length - successes.length))
-    },
-
-    voteTally() {
-      this.display.picks = false
-      // go back and get a new leader
-      this.$socket.client.emit('team_result', {
-        gameKey: this.gameKey,
-        rejected: this.currentQuest.reject
-      })
-    },
-
-    leaving(){
-      // this.quitGame()
-    },
-
-    titlebarClick(){
-      this.display.loading = true
-      this[this.currentStage.button.action]()
     },
 
     advanceRound(increment = 1){
@@ -993,7 +1014,6 @@ export default {
       }
     },
 
-
     popupClose(){
       if(this.popup.closeable){
         for(let pop in this.popup){
@@ -1009,6 +1029,11 @@ export default {
           this.popup.showMenu = false
           this.popup.closeable = true
           this.popup.allegiance = true
+        break;
+        case 'scoring':
+          this.popup.showMenu = false
+          this.popup.closeable = true
+          this.popup.rules = true
         break;
       }
 
@@ -1037,6 +1062,13 @@ export default {
 
   .token {
     margin-top: 20px;
+  }
+
+  .rules {
+    .section {
+/*      overflow-y: scroll;
+      height: 500px;*/
+    }
   }
 
   .player-list-vote {
@@ -1103,6 +1135,7 @@ export default {
     /*min-width: 100vw;*/
     position: relative;
     padding: 0;
+    padding-bottom: 30px;
     display: flex;
     flex-direction: column;
 
