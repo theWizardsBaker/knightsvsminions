@@ -12,7 +12,7 @@ Vue.config.productionTip = false
 
 const socket = io(`${process.env.VUE_APP_SOCKET_BACKEND}`, { 
   path: `${process.env.VUE_APP_PUBLIC_PATH}/socket.io`,
-  transports: ['websocket', 'polling']
+  // transports: ['websocket', 'polling']
 });
 
 Vue.use(VueSocketIOExt, socket, { store });

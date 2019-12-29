@@ -16,7 +16,7 @@ const io = require('socket.io')(http, {
   httpCompression: true,
   origins: '*:*',
   pingTimeout: 60000,
-  transports: ['websocket', 'polling'],
+  // transports: ['websocket', 'polling'],
   // resource: '/avalon/socket.io'
   path: process.env.NODE_ENV === 'production' ? '/software/knightsvsminions/socket.io' : '/socket.io'
 });
@@ -46,6 +46,24 @@ generateUserId = (name) => {
 
 
 io.on('connection', (socket) => {
+
+  socket.on('connect_error', (error) => {
+    // ...
+                  console.log("CONNECTION ERROR", error);
+  });
+
+          socket.on('error', (error) => {
+    // ...
+                  console.log("ERROR", error);
+  });
+
+  socket.on('connect_timeout', (timeout) => {
+    // ...
+  });
+
+  socket.on('disconnecting', (data) => {
+
+  });
 
   socket.on('disconnecting', (data) => {
 
