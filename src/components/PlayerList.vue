@@ -42,7 +42,7 @@ export default {
     max-height: 74vh;
     margin: auto;
     font-family: 'Kaushan Script', cursive;
-    background-image: url('../assets/paper.jpg');
+    background-image: url('../assets/paper.png');
     background-repeat: no-repeat;
     background-attachment: local;
     background-position: top center;

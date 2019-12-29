@@ -17,7 +17,7 @@ const io = require('socket.io')(http, {
   origins: '*:*',
   pingTimeout: 60000,
   // resource: '/avalon/socket.io'
-  path: '/software/knightsvsminions/socket.io/'
+  path: process.env.NODE_ENV === 'production' ? '/software/knightsvsminions/socket.io' : '/socket.io'
 });
 // adding for ability to parse json
 const bodyParser = require('body-parser');
@@ -25,7 +25,9 @@ app.use(bodyParser.json());
 // create the static app
 const staticApp = express.static(path.join(__dirname, 'dist'))
 // serve the app
-app.use('/software/knightsvsminions/', staticApp)
+if(process.env.NODE_ENV === 'production'){
+  app.use('/software/knightsvsminions/', staticApp)
+}
 
 
 

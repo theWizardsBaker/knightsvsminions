@@ -278,10 +278,10 @@
                   <div>
                     <img v-if="decision === 'success'"
                          class="image"
-                         src="../assets/grail-cup-success.jpg" />
+                         src="../assets/grail-cup-success.png" />
                     <img v-else
                          class="image"
-                         src="../assets/grail-cup-fail.jpg" />
+                         src="../assets/grail-cup-fail.png" />
                   </div>
                 </template>
               </card>
@@ -327,10 +327,10 @@
                   <div>
                     <img v-if="result.success"
                          class="image"
-                         src="../assets/grail-cup-success.jpg" />
+                         src="../assets/grail-cup-success.png" />
                     <img v-else
                          class="image"
-                         src="../assets/grail-cup-fail.jpg" />
+                         src="../assets/grail-cup-fail.png" />
                   </div>
                 </template>
               </card>
