@@ -191,20 +191,26 @@ export default {
         }
   			// what action we'll send to the socket
   			let action = option.action === 'create' ? 'create_game' : 'join_game'
-  			// emit to socket
-		  	this.$socket.client.emit(action, data, (response) => {
-          // if there was an error, show it
-          if(response.error){
-            this.showError(response.data.message)
-          } else {
+        console.log("i don't work. why?")
+        try {
 
-            // add the new elements
-            data.userId = response.data.userId
-            data.gameKey = response.data.gameKey
-            // create the new game
-            this.$store.dispatch(option.action === 'create' ? 'newGame' : 'joinGame', data)
-          }
-        })
+    			// emit to socket
+  		  	this.$socket.client.emit(action, data, (response) => {
+            console.log(action, data, response)
+            // if there was an error, show it
+            if(response.error){
+              this.showError(response.data.message)
+            } else {
+              // add the new elements
+              data.userId = response.data.userId
+              data.gameKey = response.data.gameKey
+              // create the new game
+              this.$store.dispatch(option.action === 'create' ? 'newGame' : 'joinGame', data)
+            }
+          })
+        } catch(e){
+          alert("ERROR")
+        }
   		}
   	},
 

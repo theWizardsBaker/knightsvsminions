@@ -17,6 +17,7 @@ const io = require('socket.io')(http, {
   origins: '*:*',
   pingTimeout: 60000,
   // resource: '/avalon/socket.io'
+  path: '/software/knightsvsminions/socket.io/'
 });
 // adding for ability to parse json
 const bodyParser = require('body-parser');
@@ -24,7 +25,7 @@ app.use(bodyParser.json());
 // create the static app
 const staticApp = express.static(path.join(__dirname, 'dist'))
 // serve the app
-app.use(staticApp)
+app.use('/software/knightsvsminions/', staticApp)
 
 
 
