@@ -16,22 +16,19 @@ const io = require('socket.io')(http, {
   httpCompression: true,
   origins: '*:*',
   pingTimeout: 60000,
-  transports: ['websocket', 'polling'],
+  transports: ['websocket', 'polling']
   // resource: '/avalon/socket.io'
   // path: process.env.NODE_ENV === 'production' ? '/software/knightsvsminions/socket.io' : '/socket.io'
 });
 // adding for ability to parse json
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
-// create the static app
-const staticApp = express.static(path.join(__dirname, 'dist'))
-// serve the app
 if(process.env.NODE_ENV === 'production'){
+  // create the static app
+  const staticApp = express.static(path.join(__dirname, 'dist'))
+  // serve the app
   app.use(staticApp)
 }
-
-
-
 
 
 generateId = () => {
@@ -48,30 +45,15 @@ generateUserId = (name) => {
 io.on('connection', (socket) => {
 
   socket.on('connect_error', (error) => {
-    // ...
-                  console.log("CONNECTION ERROR", error);
+    console.log("CONNECTION ERROR", error);
   });
 
-          socket.on('error', (error) => {
-    // ...
-                  console.log("ERROR", error);
+  socket.on('error', (error) => {
+    console.log("ERROR", error);
   });
 
   socket.on('connect_timeout', (timeout) => {
-    // ...
-  });
-
-  socket.on('disconnecting', (data) => {
-
-  });
-
-  socket.on('disconnecting', (data) => {
-
-  });
-
-  // game meta
-  socket.on('disconnect', (data) => {
-
+    console.log("TIMEOUT");
   });
 
   //
