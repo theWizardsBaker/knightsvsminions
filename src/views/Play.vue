@@ -775,6 +775,7 @@ export default {
   sockets: {
 
     team_selected(data){
+      console.log(data, 'TEAM SELECTED')
       this.$set(this.currentQuest, 'leader', JSON.parse(JSON.stringify(this.leader)))
       this.$set(this.currentQuest, 'team', data.team)
       this.advanceStage()
