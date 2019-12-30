@@ -191,12 +191,10 @@ export default {
         }
   			// what action we'll send to the socket
   			let action = option.action === 'create' ? 'create_game' : 'join_game'
-        console.log("i don't work. why?")
         try {
 
     			// emit to socket
   		  	this.$socket.client.emit(action, data, (response) => {
-            console.log(action, data, response)
             // if there was an error, show it
             if(response.error){
               this.showError(response.data.message)
