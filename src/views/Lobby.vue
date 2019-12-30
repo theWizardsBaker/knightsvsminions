@@ -17,7 +17,7 @@
           </div>
         </div>
         <br/>
-        <player-list :players="players"/>
+        <player-list :players="players" v-show="display"/>
         <br/>
       </div>
     </div>
@@ -44,6 +44,8 @@ export default {
 
   data () {
     return {
+      display: true,
+
       alignments: [
         // good, evil
         [3, 2], // 5
@@ -115,6 +117,7 @@ export default {
 
     startGame(){
       if(this.players.length > 4){
+        this.display = false
         // shuffle players
         let players = JSON.parse(JSON.stringify(this.players))
         // players = players.concat([
@@ -138,7 +141,7 @@ export default {
         })
         // set all normal roles
         for(let i = specialRoleCount; i < players.length; i++){
-          this.$set(players[i], 'role', i <= assignments[0] ? this.roles[0] : this.roles[1])
+          this.$set(players[i], 'role', i < assignments[0] ? this.roles[0] : this.roles[1])
         }
         // shuffle up all the players again
         this.shuffle(players)

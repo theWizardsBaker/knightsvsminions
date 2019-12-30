@@ -254,7 +254,7 @@
       <div class="section" v-else-if="popup.quest">
         <div v-if="onQuest">
           <h3 class="title is-3 fancy-title has-text-centered">
-            Quest Success
+            The Quest
           </h3>
           <br/>
           <div class="columns is-centered is-mobile">
@@ -262,7 +262,7 @@
               <card :display="game.quest === decision || game.quest === null" 
                     :select="true" 
                     :selected="game.quest === decision"
-                    @selected="game.quest = decision">
+                    @selected="questDecision(decision)">
                 <template #title>
                   <span class="tag is-medium fancy drop-shadow" 
                         :class="[decision === 'success' ? 'is-success' : 'is-danger' ]">
@@ -288,7 +288,7 @@
             </div>
           </div>
           <br/>
-          <div class="has-text-centered" v-if="isLeader">
+          <div class="has-text-centered">
             <button class="button is-medium"
                     :class="{ disabled: game.quest === null }"
                     :disabled="game.quest === null"
@@ -337,10 +337,11 @@
           </div>
         </div>
         <br/>
-        <div class="has-text-centered" v-if="isLeader">
+        <div class="has-text-centered">
           <button class="button is-medium"
                   :style="{ visibility: display.questResults  ? 'visible' : 'hidden' }"
                   v-show="!display.questEnd"
+                  v-if="isLeader"
                   @click="revealQuest()">
             Reveal Quest
           </button>
@@ -563,7 +564,8 @@ export default {
                 selectTeam: false,
                 allegiance: false,
                 vote: true,
-                closeable: false
+                closeable: false,
+                show: true
               }
             },
           },
@@ -659,7 +661,7 @@ export default {
     },
 
     'currentQuest.vote'(val, oldVal) {
-      if(val.length === this.teamSize[this.game.round] && this.popup.vote){
+      if(val.length === this.players.length && this.popup.vote){
         // add fake votes for testing
         // val.push({ player: 'gil_123', vote: true})
         // val.push({ player: 'gil_123', vote: true})
@@ -673,9 +675,9 @@ export default {
 
     'currentQuest.results'(val) {
       try {
-        if(val.length === 1){
-          this.advanceStage()
-        }
+        // if(val.length === 1){
+        //   this.advanceStage()
+        // }
         if(val.length === this.teamSize[this.game.round]){
           this.advanceStage()
         }
@@ -775,7 +777,6 @@ export default {
   sockets: {
 
     team_selected(data){
-      console.log(data, 'TEAM SELECTED')
       this.$set(this.currentQuest, 'leader', JSON.parse(JSON.stringify(this.leader)))
       this.$set(this.currentQuest, 'team', data.team)
       this.advanceStage()
@@ -885,6 +886,12 @@ export default {
     tallyVoteResutls(){
       let successes = this.currentQuest.vote.filter(vote => vote.vote)
       this.currentQuest.reject = !(successes.length > (this.currentQuest.vote.length - successes.length))
+    },
+
+    questDecision(decision){
+      if(!this.display.quest){
+        this.game.quest = decision
+      }
     },
 
     questResults(){
