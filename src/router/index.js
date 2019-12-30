@@ -8,6 +8,7 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
+    publicPath: '${process.env.VUE_APP_PUBLIC_PATH}',
     name: 'gameselect',
     component: GameSelect
   },
