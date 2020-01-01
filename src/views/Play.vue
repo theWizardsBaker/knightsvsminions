@@ -96,15 +96,15 @@
       </div>
       <div class="section" v-else-if="popup.allegiance">
         <div class="is-centered has-text-centered container" 
-              @click="display.allegiance = !display.allegiance"
             >
 
 <!--              @mousedown="display.allegiance = true" 
              @mouseup="display.allegiance = false"> -->
-          <h3 class="title is-4 tag is-black">Press and Hold to Flip</h3>
+          <h3 class="title is-4 tag is-black" @click="display.allegiance = !display.allegiance">Press and Hold to Flip</h3>
           <div class="columns is-centered is-mobile">
             <div class="column is-narrow">
-              <card :display="display.allegiance">
+              <!-- <card :display="display.allegiance"> -->
+              <card :display="true">
                 <template #title>
                   <span class="tag is-medium is-knight fancy drop-shadow" v-if="allegiance">{{role.name}}</span>
                   <span class="tag is-medium is-minion fancy drop-shadow" v-else>{{role.name}}</span>
