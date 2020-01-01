@@ -5,6 +5,8 @@ import router from './router'
 import store from './store'
 import io from 'socket.io-client'
 import VueSocketIOExt from 'vue-socket.io-extended'
+import Vue2TouchEvents from 'vue2-touch-events'
+ 
 
 import '@/styles/main.scss'
 
@@ -15,6 +17,7 @@ const socket = io(`${process.env.VUE_APP_SOCKET_BACKEND}`, {
   // transports: ['websocket', 'polling']
 });
 
+Vue.use(Vue2TouchEvents)
 Vue.use(VueSocketIOExt, socket, { store });
 
 Vue.filter('capitalize', (value) => {
