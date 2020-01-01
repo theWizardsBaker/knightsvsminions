@@ -96,10 +96,11 @@
       </div>
       <div class="section" v-else-if="popup.allegiance">
         <div class="is-centered has-text-centered container" 
-              v-touch:touchhold="display.allegiance = true"
-               v-touch:tap="display.allegiance = false"
-             @mousedown="display.allegiance = true" 
-             @mouseup="display.allegiance = false">
+              @click="display.allegiance = !display.allegiance"
+            >
+
+<!--              @mousedown="display.allegiance = true" 
+             @mouseup="display.allegiance = false"> -->
           <h3 class="title is-4 tag is-black">Press and Hold to Flip</h3>
           <div class="columns is-centered is-mobile">
             <div class="column is-narrow">
