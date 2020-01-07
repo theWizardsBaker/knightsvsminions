@@ -7,11 +7,13 @@
       </h3>
       <br/>
       <div class="columns is-centered is-mobile is-multiline">
-        <div class="column is-narrow" v-for="decision in ['success', 'fail']">
+        <div class="column is-narrow" 
+             v-for="decision in ['success', 'fail']" 
+             @click="questDecision(decision)">
           <card :display="quest === decision || quest === null"
                 :select="true"
                 :selected="quest === decision"
-                @selected="questDecision(decision)">
+                >
             <template #title>
               <span class="tag is-medium fancy drop-shadow"
                     :class="[decision === 'success' ? 'is-success' : 'is-danger' ]">
@@ -98,6 +100,11 @@ export default {
       if(!this.saved){
         this.saved = true
         this.$emit('saveQuestOutcome', this.quest)
+      }
+    },
+    questDecision(decision){
+      if(!this.saved){
+        this.$emit('questDecision', decision)
       }
     }
   }

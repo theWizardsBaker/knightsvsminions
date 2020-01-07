@@ -49,8 +49,8 @@ export default {
   data() {
     return {
       images: {
-        true: '../assets/grail-cup-success.png',
-        false: '../assets/grail-cup-fail.png',
+        true: require('@/assets/grail-cup-success.png'),
+        false: require('@/assets/grail-cup-fail.png'),
       },
     }
   },

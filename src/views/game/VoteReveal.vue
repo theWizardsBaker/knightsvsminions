@@ -2,10 +2,10 @@
   <div>
     <h3 class="title is-2 fancy has-text-centered"
         :class="[
-          !!rejected ? 'has-text-success' : 'has-text-danger',
+          !!rejected ? 'has-text-danger' : 'has-text-success',
           (rejected === null || rejected === undefined) ? 'is-invisible' : ''
         ]">
-      {{!!rejected ? 'Approved' : 'Rejected'}}
+      {{!!rejected ? 'Rejected' : 'Approved' }}
     </h3>
     <br/>
     <div class="columns is-multiline is-mobile is-centered">

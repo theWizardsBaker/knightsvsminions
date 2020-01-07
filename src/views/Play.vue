@@ -64,9 +64,10 @@
             Knights Win
           </h3>
           <br/>
-          <h3 class="title is-5 tag is-black has-text-centered">
+          <h3 class="subtitle is-5 is-black has-text-centered">
             However,
-            <br/>
+          </h3>
+          <h3 class="subtitle is-5 is-black has-text-centered">
             If Minions can guess Merlin, they win...
           </h3>
         </div>
@@ -93,7 +94,7 @@
           </player-list>
         </div>
         <br/>
-        <div class="columns is-variable is-8 is-centered is-mobile" >
+        <div class="columns is-variable is-2 is-centered is-mobile" >
           <div class="column is-3-desktop" 
                :class="{ 'has-text-right': !button }"
                v-for="button in [false, true]"
@@ -139,10 +140,11 @@
                :quest="game.quest"
                :onQuest="onQuest"
                @saveQuestOutcome="saveQuestOutcome"
+               @questDecision="questDecision"
                />
       </div>
       <div class="section" v-else-if="popup.questResults">
-        <quest-result :result="currentQuest.results">
+        <quest-result :results="currentQuest.results">
           <button class="button is-medium"
                   :style="{ visibility: display.questResults  ? 'visible' : 'hidden' }"
                   v-show="!display.questEnd"
@@ -506,7 +508,7 @@ export default {
     isEndGame(val){
       if(val){
         this.popup.show = true
-        this.popup.closeable = true
+        this.popup.closeable = false
       }
     }
 
@@ -584,7 +586,7 @@ export default {
         endGame = true
       }
       // if one team won by votes
-      if(this.game.knightWins >= 3 || this.game.minionWins >= 3){
+      if(this.game.knightWins >= 1 || this.game.minionWins >= 3){
         endGame = true
       }
       return endGame
@@ -712,11 +714,11 @@ export default {
       this.currentQuest.reject = !(successes.length > (this.currentQuest.vote.length - successes.length))
     },
 
-    // questDecision(decision){
-    //   if(!this.display.quest){
-    //     this.game.quest = decision
-    //   }
-    // },
+    questDecision(decision){
+      if(!this.display.quest){
+        this.$set(this.game, 'quest', decision)
+      }
+    },
 
     questResults(){
       // number of fails
