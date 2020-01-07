@@ -77,6 +77,7 @@ export default {
           -o-transform: scale(-1, 1);
           -webkit-transform: scale(-1, 1);
           transform: scale(-1, 1);
+          padding-top: 10px;
         }
 
 
@@ -99,6 +100,7 @@ export default {
             flex-direction: column; 
             position: relative;
             width: 100%;
+            padding-top: 18px;
             padding-bottom: 15px;
             border-radius: 5px;
 

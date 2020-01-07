@@ -13,7 +13,7 @@
         <div class="columns">
           <div class="column is-centered">
             <div class="votes">
-              <div class="columns is-mobile is-centered">
+              <div class="columns is-multiline is-mobile is-centered">
                 <div class="column is-narrow" v-for="index in 5" :key="index">
                   <div class="token" :class="[ !!rejected[index - 1] ? 'is-minion' : 'is-neutral' ]">
                     <span class="quest">Quest</span>

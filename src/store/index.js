@@ -41,9 +41,9 @@ export default new Vuex.Store({
 
     leader: ({game, players}) => players[game.leader],
 
-    isLeader: ({user}, { leader }) => leader.userId === user.id,
+    // isLeader: ({user}, { leader }) => leader.userId === user.id,
 
-    // isLeader: ({user}, { leader }) => true,
+    isLeader: ({user}, { leader }) => true,
 
     role: (store, { player }) => player.role,
 

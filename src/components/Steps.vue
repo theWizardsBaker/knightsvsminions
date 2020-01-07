@@ -13,8 +13,9 @@
         3 failures - <span class="tag is-medium is-minion fancy drop-shadow">Minions</span> win
       </h3>
       <div class="castle">
-        <div class="columns is-multiline is-centered is-mobile">
-          <div class="column is-auto-desktop is-4-tablet is-6-mobile" v-for="teamSize, index in teams" :key="index">
+        <div class="columns is-8 is-variable is-multiline is-centered is-mobile">
+          <div class="column is-auto-desktop is-4-tablet is-narrow-mobile"
+               v-for="teamSize, index in teams" :key="index">
             <div class="token"
                  :class="{
                   'current-round': index === currentRound,

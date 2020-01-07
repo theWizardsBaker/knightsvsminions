@@ -9,6 +9,7 @@ const http = require('http').Server(app);
 const path = require('path');
 // cross origin requests
 const cors = require('cors');
+//
 app.use(cors({credentials: true, origin: true}))
 // socket io
 const io = require('socket.io')(http, {
@@ -16,7 +17,7 @@ const io = require('socket.io')(http, {
   httpCompression: true,
   origins: '*:*',
   pingTimeout: 60000,
-  // transports: ['websocket', 'polling']
+  transports: ['websocket', 'polling']
   // resource: '/avalon/socket.io'
   // path: process.env.NODE_ENV === 'production' ? '/software/knightsvsminions/socket.io' : '/socket.io'
 });
@@ -164,7 +165,7 @@ io.on('connection', (socket) => {
 });
 
 
-http.listen(8087, '127.0.0.1', () => {
-// http.listen(8087, '0.0.0.0', () => {
+// http.listen(8087, '127.0.0.1', () => {
+http.listen(8087, '0.0.0.0', () => {
     console.log('Listening on port *: 8087');
 });

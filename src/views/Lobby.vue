@@ -11,7 +11,7 @@
         <div v-if="isHost">
           <br/>
           <div class="buttons is-centered">
-            <button class="button is-success" @click="startGame" :disabled="players.length < 5">
+            <button class="button is-success" @click="startGame" :disabled="players.length < 1">
               Begin Game
             </button>
           </div>
@@ -116,17 +116,17 @@ export default {
   methods: {
 
     startGame(){
-      if(this.players.length > 4){
+      if(this.players.length > 0){
         this.display = false
         // shuffle players
         let players = JSON.parse(JSON.stringify(this.players))
-        // players = players.concat([
-        //   { userId: "Bob_820310300", name:"Bob", gameKey:this.gameKey },
-        //   { userId: "Tim_82031000", name:"Tim", gameKey:this.gameKey },
-        //   { userId: "Tiny_82031000", name:"Tiny", gameKey:this.gameKey },
-        //   { userId: "Mike_82031000", name:"Mike", gameKey:this.gameKey },
-        //   { userId: "Albert_82031000", name:"Albert", gameKey:this.gameKey }
-        // ])
+        players = players.concat([
+          { userId: "Bob_820310300", name:"Bob", gameKey:this.gameKey },
+          { userId: "Tim_82031000", name:"Tim", gameKey:this.gameKey },
+          { userId: "Tiny_82031000", name:"Tiny", gameKey:this.gameKey },
+          { userId: "Mike_82031000", name:"Mike", gameKey:this.gameKey },
+          { userId: "Albert_82031000", name:"Albert", gameKey:this.gameKey }
+        ])
         let assignments = JSON.parse(JSON.stringify(this.assignments))
         // shuffle to assign roles
         this.shuffle(players)

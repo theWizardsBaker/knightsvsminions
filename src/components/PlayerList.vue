@@ -5,7 +5,11 @@
     </div>
     <div class="player-list">
       <div v-for="player, index in players">
-        <h3 class="subtitle">
+        <h3 class="subtitle is-marginless is-hidden-mobile">
+          <span class="help">{{index + 1}}. </span>
+          {{player.name}}
+        </h3>
+        <h3 class="subtitle is-hidden-tablet">
           <span class="help">{{index + 1}}. </span>
           {{player.name}}
         </h3>
@@ -62,7 +66,12 @@ export default {
         display: inline-block;
       }
       .subtitle{
-        font-size: 2em;
+        &.is-hidden-mobile{
+          font-size: 2em;
+        }
+        &.is-hidden-tablet {
+          font-size: 5.7vw;
+        }
         color: #000021db;
       }
     }

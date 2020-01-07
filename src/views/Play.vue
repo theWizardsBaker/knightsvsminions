@@ -19,7 +19,6 @@
 
     <!-- pop up helper -->
     <popup :display="popup.show" @close="popupClose" :closeable="popup.closeable">
-      <!-- <div style="position: absolute; left: 0">{{currentQuest}}</div> -->
       <!-- options menu -->
       <option-menu :options="game.options"
                    @optionClick="handleOptionClick"
@@ -39,97 +38,20 @@
         </article>
       </div>
       <div class="section" v-else-if="popup.rules">
-        <h3 class="title fancy drop-shadow is-2 has-text-centered">Knights vs Minions</h3>
-        <div class="container rules">
-          <div class="section">
-            <h4 class="subtitle fancy is-4">Overview</h4>
-            <p>
-              The game consists of 5 rounds; each round has a team building phase and a Quest phase.
-              <br/>
-              <br/>
-              To begin a round, the leader proposes a team to complete a Quest - all other players will either approve the proposed team and move to the quest phase, or reject the proposed team passing leadership to the next player and repeating the process until a team is approved. In the Quest phase those players selected to be on the team will determine if the Quest is succesfull.
-            </p>
-            <br/>
-            <hr/>
-            <h4 class="subtitle fancy is-4">Team Assignment</h4>
-            <p>
-              The leader selects the required number of players to form a team. The leader can be on the team, but is not required to be so.
-            </p>
-            <br/>
-            <hr/>
-            <h4 class="subtitle fancy is-4">Team vote</h4>
-            <p>
-              After appropriate discussion, all other players will vote on the team composition. The leader can be a Minion, or one (or more) of the other players chosen may be.
-              <br/>
-              <br/>
-              If the team is approved, play continues in the quest phase.
-              <br/>
-              <br/>
-              If the team is rejected (a tied vote is also rejection), a new leader is chosen and the team building phase is repeated.
-              <br/>
-              <br/>
-              Minions wins the game if five teams are rejected in a single round.
-            </p>
-            <br/>
-            <hr/>
-            <h4 class="subtitle fancy is-4">Quest Phase</h4>
-            <p>
-              Each player on the quest selects a quest card. The quest fails if one or more fail cards are played.
-              <br/>
-              <br/>
-              The good players must select the quest success card. Minions may select either the quest success (Stephanie) or quest fail card.
-            </p>
-            <br/>
-            <hr/>
-            <h4 class="subtitle fancy is-4">End of the game</h4>
-            <p>
-              The game ends immediately after either 3 succesful or three failed quests. The Minion players win if 3 quests fail or when 5 teams are rejected in a single round.
-            </p>
-            <br/>
-            <hr/>
-            <h4 class="subtitle fancy is-4">Assassinate Merlin</h4>
-            <p>
-              If 3 quests are completed succesfully, the Minion players will have a final opportunity to win the game by correctly naming which of the Knights is Merlin.
-            </p>
-          </div>
-        </div>
+        <rules />
       </div>
       <div class="section" v-else-if="popup.allegiance">
-        <div class="is-centered has-text-centered container" 
+        <div class="is-centered has-text-centered container"
+            @click="display.allegiance = !display.allegiance"
             >
-
-<!--              @mousedown="display.allegiance = true" 
-             @mouseup="display.allegiance = false"> -->
-          <h3 class="title is-4 tag is-black" @click="display.allegiance = !display.allegiance">Press and Hold to Flip</h3>
-          <div class="columns is-centered is-mobile">
-            <div class="column is-narrow">
-              <!-- <card :display="display.allegiance"> -->
-              <card :display="true">
-                <template #title>
-                  <span class="tag is-medium is-knight fancy drop-shadow" v-if="allegiance">{{role.name}}</span>
-                  <span class="tag is-medium is-minion fancy drop-shadow" v-else>{{role.name}}</span>
-                </template>
-                <template #content>
-                  <p class="fancy" v-if="allegiance">
-                    Loyal to the Round Table
-                  </p>
-                  <p class="fancy" v-else>
-                    Disloyal to the Round Table
-                  </p>
-                  <div v-if="!allegiance || role.name === 'Merlin'">
-                    <br/>
-                    <div class="cohorts" v-if="role.name === 'Merlin'">Minions</div>
-                    <div class="cohorts" v-else>cohorts</div>
-                    <ul class="minion-list">
-                      <li v-for="minion in minions">
-                        <span class="fancy">{{minion.name}}</span>
-                      </li>
-                    </ul>
-                  </div>
-                </template>
-              </card>
-            </div>
-          </div>
+          <p>click to flip</p>
+          <br/>
+          <!-- Check the allegiance -->
+          <allegiance :display="display.allegiance"
+                      :allegiance="allegiance"
+                      :role="role.name"
+                      :minions="minions"
+                      />
         </div>
       </div>
       <div v-else-if="display.endgame" class="container has-text-centered">
@@ -150,38 +72,19 @@
         </div>
       </div>
       <div class="section" v-else-if="popup.selectTeam">
-        <article class="panel is-primary">
-          <p class="panel-heading has-text-weight-bold has-text-centered">
-            Select {{teamSize[game.round]}} Players
-          </p>
-          <a class="panel-block is-link"
-             v-for="player in players"
-             @click="selectPlayer(player)"
-             :diabled="!teamSelection">
-            <span class="panel-icon">
-              <i class="fa"
-                 aria-hidden="true"
-                 :class="[ player.selected ? 'fa-check-square' : 'fa-square-o' ]"
-                 >
-              </i>
-            </span>
-            {{player.name}}
-          </a>
-          <a class="panel-block">
-            <button class="button is-fullwidth"
-                    :class="{ 'is-success': teamSelection, 'is-loading' : game.submittedSelections }"
-                    :disabled="!teamSelection || game.submittedSelections"
-                    @click="sendSelections"
-                    >
-              Create Team
-            </button>
-          </a>
-        </article>
+        <!-- team leader selects players -->
+        <team-select :players="players"
+                     :playerCount="questPlayerCount"
+                     :submitted="game.submittedSelections"
+                     @teamMemberSelected="selectPlayer"
+                     @selectTeam="selectTeam"
+                     />
       </div>
       <div class="section" v-else-if="popup.vote">
+        <!-- all players vote on the leader's selections -->
         <div class="player-list-vote">
           <player-list :players="currentQuest.team">
-            <h3 class="title is-2 has-text-centered has-text-black">
+            <h3 class="title is-2 has-text-centered has-text-black is-marginless">
               &#128081; {{leader.name}}
             </h3>
             <h3 class="subtitle is-4 has-text-centered has-text-black quest-vote-list">
@@ -190,157 +93,56 @@
           </player-list>
         </div>
         <br/>
-        <div class="columns is-centered is-mobile" >
-          <div class="column has-text-centered is-3-desktop is-5-mobile">
-            <button class="button is-danger is-large"
-                    :class="{ 'is-disabled': !display.vote }"
+        <div class="columns is-variable is-8 is-centered is-mobile" >
+          <div class="column is-3-desktop" 
+               :class="{ 'has-text-right': !button }"
+               v-for="button in [false, true]"
+               >
+            <button class="button is-large-tablet"
+                    :class="{ 'is-disabled': !display.vote, 'is-danger': !button, 'is-success': button }"
                     :disabled="!display.vote"
-                    @click="vote(false)">
+                    @click="vote(button)">
               <span class="icon">
                 <i class="fa fa-close" aria-hidden="true"></i>
               </span>
-              <span>Reject</span>
-            </button>
-          </div>
-          <div class="column has-text-centered is-3-desktop is-5-mobile">
-            <button class="button is-large is-success"
-                    :class="{ 'is-disabled': !display.vote }"
-                    :disabled="!display.vote"
-                    @click="vote(true)">
-              <span class="icon">
-                <i class="fa fa-check" aria-hidden="true"></i>
-              </span>
-              <span>Approve</span>
+              <span>{{ button ? 'Approve' : 'Reject' }}</span>
             </button>
           </div>
         </div>
       </div>
       <div class="section" v-else-if="popup.votereveal">
-        <h3 class="title is-2 fancy has-text-centered"
-            :class="[this.currentQuest.reject ? 'has-text-danger' : 'has-text-success']"
-            :style="{visibility: (this.currentQuest.reject === true || this.currentQuest.reject === false) ? 'visible' : 'hidden'}">
-          {{!!this.currentQuest.reject ? 'Rejected' : 'Approved'}}
-        </h3>
-        <br/>
-        <div class="columns is-multiline is-mobile">
-          <div class="column is-3-desktop is-4-mobile" v-for="vote in currentQuest.vote">
-            <vote-card :display="vote.display">
-              <div class="token has-text-centered" >
-                <span class="icon is-large">
-                  <span class="fa-stack fa-2x">
-                    <i class="fa fa-circle fa-stack-2x"
-                       :class="[vote.vote ? 'has-text-success' : 'has-text-danger']"></i>
-                    <i class="fa fa-stack-1x has-text-white"
-                       :class="[vote.vote ? 'fa-check' : 'fa-close']"></i>
-                  </span>
-                </span>
-                <br/>
-                <span class="has-text-weight-bold">{{vote.vote ? 'Approve' : 'Reject'}}</span>
-              </div>
-            </vote-card>
+        <vote-reveal :votes="currentQuest.vote" :rejected="currentQuest.reject">
+          <div v-if="isLeader">
+            <div class="has-text-centered">
+              <button class="button is-medium"
+                      :class="{
+                        'is-invisible': (!display.picks && (currentQuest.reject !== null || currentQuest.reject !== undefined))
+                      }"
+                      @click="voteTally()">
+                Continue
+              </button>
+            </div>
+            <div class="has-text-centered">
+              <button class="button is-medium"
+                      :class="{
+                        'is-invisible': display.revealing
+                      }"
+                      @click="revealPicks()">
+                Reveal Votes
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="has-text-centered" v-if="isLeader">
-          <button class="button is-medium"
-                  :style="{
-                    visibility: (display.picks && (this.currentQuest.reject === true || this.currentQuest.reject === false)) ? 'visible' : 'hidden' }"
-                  @click="voteTally()">
-            Continue
-          </button>
-        </div>
-        <div class="has-text-centered" v-if="isLeader">
-          <button class="button is-medium" :style="{ visibility: !display.revealing  ? 'visible' : 'hidden' }" @click="revealPicks()">
-            Reveal Votes
-          </button>
-        </div>
+        </vote-reveal>
       </div>
       <div class="section" v-else-if="popup.quest">
-        <div v-if="onQuest">
-          <h3 class="title is-3 fancy-title has-text-centered">
-            The Quest
-          </h3>
-          <br/>
-          <div class="columns is-centered is-mobile">
-            <div class="column is-narrow" v-for="decision in ['success', 'fail']">
-              <card :display="game.quest === decision || game.quest === null" 
-                    :select="true" 
-                    :selected="game.quest === decision"
-                    @selected="questDecision(decision)">
-                <template #title>
-                  <span class="tag is-medium fancy drop-shadow" 
-                        :class="[decision === 'success' ? 'is-success' : 'is-danger' ]">
-                    <template v-if="decision === 'success'">
-                      Success
-                    </template>
-                    <template v-else>
-                      Fail
-                    </template>
-                  </span>
-                </template>
-                <template #content>
-                  <div>
-                    <img v-if="decision === 'success'"
-                         class="image"
-                         src="../assets/grail-cup-success.png" />
-                    <img v-else
-                         class="image"
-                         src="../assets/grail-cup-fail.png" />
-                  </div>
-                </template>
-              </card>
-            </div>
-          </div>
-          <br/>
-          <div class="has-text-centered">
-            <button class="button is-medium"
-                    :class="{ disabled: game.quest === null }"
-                    :disabled="game.quest === null"
-                    v-show="!display.quest"
-                    @click="saveQuestOutcome()">
-              Continue
-            </button>
-          </div>
-        </div>
-        <div v-else>
-          <h3 class="title is-3 fancy-title has-text-centered">
-            Quest in Progress
-          </h3>
-          <div class="columns is-centered is-mobile">
-            <div class="column is-narrow" v-for="team, index in currentQuest.team">
-              <card :display="false" />
-            </div>
-          </div>
-        </div>
+        <quest :team="currentQuest.team"
+               :quest="game.quest"
+               :onQuest="onQuest"
+               @saveQuestOutcome="saveQuestOutcome"
+               />
       </div>
       <div class="section" v-else-if="popup.questResults">
-        <h3 class="title is-3 fancy-title has-text-centered">
-          Quest Result
-        </h3>
-        <br/>
-        <div class="columns is-multiline is-centered is-mobile">
-          <div class="column is-narrow" v-for="result, index in currentQuest.results">
-            <card :display="result.reveal">
-                <template #title>
-                  <span class="tag is-medium fancy drop-shadow"
-                        :class="[result.success ? 'is-success' : 'is-danger' ]">
-                    {{ result.success ? 'Success' : 'Fail' }}
-                  </span>
-                </template>
-                <template #content>
-                  <div>
-                    <img v-if="result.success"
-                         class="image"
-                         src="../assets/grail-cup-success.png" />
-                    <img v-else
-                         class="image"
-                         src="../assets/grail-cup-fail.png" />
-                  </div>
-                </template>
-              </card>
-          </div>
-        </div>
-        <br/>
-        <div class="has-text-centered">
+        <quest-result :result="currentQuest.results">
           <button class="button is-medium"
                   :style="{ visibility: display.questResults  ? 'visible' : 'hidden' }"
                   v-show="!display.questEnd"
@@ -354,7 +156,7 @@
                   @click="questResults()">
             Continue
           </button>
-        </div>
+        </quest-result>
       </div>
     </popup>
 
@@ -369,7 +171,7 @@
                    :currentRound="game.round"
                    :quests="game.quests"
                    :doubleFail="doubleFail"
-                   @selectTeam="selectTeam"
+                   @selectTeam="showSelectTeam"
                    @teamHistory="teamHistory"
                    />
             <votes :rejected="currentQuest.rejected"/>
@@ -391,8 +193,13 @@ import ConfirmBox from '@/components/ConfirmBox'
 import Steps from '@/components/Steps'
 import Votes from '@/components/Votes'
 import PlayerList from '@/components/PlayerList'
-import Card from '@/components/Card'
-import VoteCard from '@/components/VoteCard'
+// game components
+import Allegiance from './game/Allegiance'
+import Quest from './game/Quest'
+import QuestResult from './game/QuestResult'
+import Rules from './game/Rules'
+import TeamSelect from './game/TeamSelect'
+import VoteReveal from './game/VoteReveal'
 
 import { mapState, mapGetters, mapActions } from 'vuex'
 
@@ -401,7 +208,6 @@ export default {
   name: 'Play',
 
   components: {
-    Card,
   	Navbar,
     Popup,
     Titlebar,
@@ -410,7 +216,12 @@ export default {
     Steps,
     PlayerList,
     Votes,
-    VoteCard,
+    Allegiance,
+    Quest,
+    QuestResult,
+    Rules,
+    TeamSelect,
+    VoteReveal,
   },
 
   created(){
@@ -664,11 +475,14 @@ export default {
     },
 
     'currentQuest.vote'(val, oldVal) {
-      if(val.length === this.players.length && this.popup.vote){
+      // if(val.length === this.players.length && this.popup.vote){
+      if(val.length === 1 && this.popup.vote){
         // add fake votes for testing
-        // val.push({ player: 'gil_123', vote: true})
-        // val.push({ player: 'gil_123', vote: true})
-        // val.push({ player: 'gil_123', vote: false})
+        val.push({ player: 'gil_123', vote: true})
+        val.push({ player: 'gil_123', vote: true})
+        val.push({ player: 'gil_123', vote: true})
+        val.push({ player: 'gil_123', vote: false})
+        val.push({ player: 'gil_123', vote: false})
 
         this.advanceStage()
         this.shuffle(this.currentQuest.vote)
@@ -678,14 +492,14 @@ export default {
 
     'currentQuest.results'(val) {
       try {
-        // if(val.length === 1){
-        //   this.advanceStage()
-        // }
-        if(val.length === this.teamSize[this.game.round]){
+        if(val.length === 1){
+          this.advanceStage()
+        }
+        if(val.length === this.questPlayerCount){
           this.advanceStage()
         }
       } catch(e){
-        console.log(val, this.teamSize[this.game.round])
+        console.log(val, this.questPlayerCount)
       }
     },
 
@@ -718,6 +532,10 @@ export default {
       'role',
     ]),
 
+    questPlayerCount(){
+      return this.teamSize[this.game.round]
+    },
+
     doubleFail(){
       return this.players.length > 6
     },
@@ -747,16 +565,12 @@ export default {
       return this.game.questTeamSize[this.players.length - this.minPlayers]
     },
 
-    teamSelection(){
-      return this.teamSize[this.game.round] === this.players.filter(player => player.selected).length
-    },
-
     currentQuest(){
       return this.game.quests[this.game.round]
     },
 
     onQuest(){
-      if(this.currentQuest.team.length === this.teamSize[this.game.round]){
+      if(this.currentQuest.team.length === this.questPlayerCount){
         let player = this.currentQuest.team.some(player => player.userId === this.player.userId)
         return player
       }
@@ -853,17 +667,24 @@ export default {
       'nextLeader'
     ]),
 
-    selectTeam() {
+    selectPlayer(player) {
+      this.$store.dispatch('playerSelect', player.userId)
+    },
+
+    selectTeam(){
+      this.game.submittedSelections = true
+      // emit to socket
+      this.$socket.client.emit('submit_team', {
+        gameKey: this.gameKey,
+        team: this.players.filter(player => player.selected)
+      })
+    },
+
+    showSelectTeam() {
       this.$store.dispatch('clearPlayerSelections')
       this.$set(this.popup, 'show', true)
       this.$set(this.popup, 'selectTeam', true)
       this.$set(this.popup, 'closeable', true)
-    },
-
-    selectPlayer(player) {
-      if(!this.teamSelection || player.selected){
-        this.$store.dispatch('playerSelect', player.userId)
-      }
     },
 
     vote(decision){
@@ -891,11 +712,11 @@ export default {
       this.currentQuest.reject = !(successes.length > (this.currentQuest.vote.length - successes.length))
     },
 
-    questDecision(decision){
-      if(!this.display.quest){
-        this.game.quest = decision
-      }
-    },
+    // questDecision(decision){
+    //   if(!this.display.quest){
+    //     this.game.quest = decision
+    //   }
+    // },
 
     questResults(){
       // number of fails
@@ -948,24 +769,11 @@ export default {
       }
     },
 
-    sendSelections(){
-      this.game.submittedSelections = true
-      // emit to socket
-      this.$socket.client.emit('submit_team', {
-        gameKey: this.gameKey,
-        team: this.players.filter(player => player.selected)
-      })
-    },
-
     revealPicks() {
       this.display.revealing = true
       this.$socket.client.emit('reveal_picks', {
         gameKey: this.gameKey
       })
-    },
-
-    leaving(){
-      // this.quitGame()
     },
 
     titlebarClick(){
@@ -1030,6 +838,7 @@ export default {
         for(let pop in this.popup){
           this.popup[pop] = false
         }
+        this.display.allegiance = false
       }
     },
 
