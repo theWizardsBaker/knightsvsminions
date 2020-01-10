@@ -5,7 +5,13 @@ import router from './router'
 import store from './store'
 import io from 'socket.io-client'
 import VueSocketIOExt from 'vue-socket.io-extended'
- 
+import axios from 'axios'
+import VueAxios from 'vue-axios'
+
+axios.defaults.baseURL = `${process.env.VUE_APP_SOCKET_BACKEND}/api/`
+axios.defaults.headers.common['Content-Type'] = 'application/json'
+
+Vue.use(VueAxios, axios)
 
 import '@/styles/main.scss'
 

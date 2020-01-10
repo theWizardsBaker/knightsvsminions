@@ -91,7 +91,7 @@
 
 <script>
 import Card from '@/components/Card.vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 export default {
 
@@ -152,6 +152,11 @@ export default {
 
   computed: {
 
+    // get the states from the store
+    ...mapState({
+      maxPlayers: ({game})=> game.maxPlayers,
+    }),
+
     ...mapGetters([
       'gameKey',
     ]),
@@ -188,6 +193,7 @@ export default {
           userId: null,
           name: option.userName,
           gameKey: option.gameKey,
+          maxPlayers: this.maxPlayers
         }
   			// what action we'll send to the socket
   			let action = option.action === 'create' ? 'create_game' : 'join_game'

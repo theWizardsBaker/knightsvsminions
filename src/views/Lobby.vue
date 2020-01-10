@@ -8,7 +8,7 @@
         <div class="is-centered has-text-centered fancy-subtitle drop-shadow">
           <span class="subtitle has-text-weight-bold">{{players.length}} / {{maxPlayers}} players</span>
         </div>
-        <div v-if="isHost">
+        <div v-if="isHost" v-show="display">
           <br/>
           <div class="buttons is-centered">
             <button class="button is-success" @click="startGame" :disabled="players.length < 1">
@@ -38,12 +38,23 @@ export default {
 
   created(){
     if(!this.isHost){
-      this.$socket.client.emit('request_game_state', { gameKey: this.gameKey })
+      this.$socket.client.emit('get_players', { gameKey: this.gameKey })
+      // this.$store.dispatch('requestGameState')
     }
+
+  },
+
+  mounted(){
+    window.addEventListener('beforeunload', this.quitGame)
+  },
+
+  destroyed(){
+    window.removeEventListener('beforeunload', this.quitGame)
   },
 
   data () {
     return {
+
       display: true,
 
       alignments: [
@@ -57,6 +68,7 @@ export default {
         [7, 4], // 11
         [7, 5], // 12
       ],
+
       roles: [
         {
           name: 'Knight',
@@ -102,14 +114,15 @@ export default {
 
     ...mapGetters([
       'gameKey',
+      'player',
       'players',
       'isHost',
       'inGame',
     ]),
 
     assignments(){
-      // return this.alignments[this.players.length - this.minPlayers]
-      return this.alignments[6 - this.minPlayers]
+      return this.alignments[this.players.length - this.minPlayers]
+      // return this.alignments[6 - this.minPlayers]
     }
   },
 
@@ -120,13 +133,13 @@ export default {
         this.display = false
         // shuffle players
         let players = JSON.parse(JSON.stringify(this.players))
-        players = players.concat([
-          { userId: "Bob_820310300", name:"Bob", gameKey:this.gameKey },
-          { userId: "Tim_82031000", name:"Tim", gameKey:this.gameKey },
-          { userId: "Tiny_82031000", name:"Tiny", gameKey:this.gameKey },
-          { userId: "Mike_82031000", name:"Mike", gameKey:this.gameKey },
-          { userId: "Albert_82031000", name:"Albert", gameKey:this.gameKey }
-        ])
+        // players = players.concat([
+        //   { userId: "Bob_820310300", name:"Bob", gameKey:this.gameKey },
+        //   { userId: "Tim_82031000", name:"Tim", gameKey:this.gameKey },
+        //   { userId: "Tiny_82031000", name:"Tiny", gameKey:this.gameKey },
+        //   { userId: "Mike_82031000", name:"Mike", gameKey:this.gameKey },
+        //   { userId: "Albert_82031000", name:"Albert", gameKey:this.gameKey }
+        // ])
         let assignments = JSON.parse(JSON.stringify(this.assignments))
         // shuffle to assign roles
         this.shuffle(players)
@@ -141,12 +154,15 @@ export default {
         })
         // set all normal roles
         for(let i = specialRoleCount; i < players.length; i++){
-          this.$set(players[i], 'role', i < assignments[0] ? this.roles[0] : this.roles[1])
+          this.$set(players[i], 'role', i <= assignments[0] ? this.roles[0] : this.roles[1])
         }
         // shuffle up all the players again
         this.shuffle(players)
         // emit to socket
-        this.$socket.client.emit('begin_game', { gameKey: this.gameKey, players: players })
+        this.$socket.client.emit('begin_game', {
+          gameKey: this.gameKey,
+          players: players,
+        })
       }
     },
 
@@ -155,6 +171,15 @@ export default {
         name: 'play',
         params: { gameKey: this.gameKey }
       })
+    },
+
+    quitGame(){
+      if(!this.inGame){
+        this.$socket.client.emit('quit_game', {
+          gameKey: this.gameKey,
+          userId: this.player.userId
+        })
+      }
     },
 
   }

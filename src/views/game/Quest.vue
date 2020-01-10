@@ -31,8 +31,8 @@
       <br/>
       <div class="has-text-centered">
         <button class="button is-medium"
-                :class="{ disabled: quest === null }"
-                :disabled="quest === null"
+                :class="{ disabled: saved }"
+                :disabled="saved"
                 v-show="quest !== null"
                 @click="saveQuestOutcome()">
           Select Card

@@ -115,9 +115,10 @@
         <vote-reveal :votes="currentQuest.vote" :rejected="currentQuest.reject">
           <div v-if="isLeader">
             <div class="has-text-centered">
+               <!-- && (currentQuest.reject === null || currentQuest.reject === null) -->
               <button class="button is-medium"
                       :class="{
-                        'is-invisible': (!display.picks && (currentQuest.reject !== null || currentQuest.reject !== undefined))
+                        'is-hidden': !display.picks
                       }"
                       @click="voteTally()">
                 Continue
@@ -146,15 +147,15 @@
       <div class="section" v-else-if="popup.questResults">
         <quest-result :results="currentQuest.results">
           <button class="button is-medium"
-                  :style="{ visibility: display.questResults  ? 'visible' : 'hidden' }"
+                  :style="{ 'is-invisible': display.questResults }"
                   v-show="!display.questEnd"
                   v-if="isLeader"
                   @click="revealQuest()">
             Reveal Quest
           </button>
+          <div class="is-hidden">{{display.questResults}}</div>
           <button class="button is-medium"
-                   v-show="display.questEnd"
-                  :style="{ visibility: display.questEnd  ? 'visible' : 'hidden' }"
+                   v-show="display.questEnd && !display.questResults"
                   @click="questResults()">
             Continue
           </button>
@@ -226,8 +227,17 @@ export default {
     VoteReveal,
   },
 
+  // mounted(){
+  //   this.$nextTick(() => {
+  //     window.setInterval(() => {
+  //         this.checkGameStatus()
+  //     },120000)
+  //   })
+  // },
+
   created(){
     window.addEventListener('beforeunload', this.leaving)
+    document.addEventListener("visibilitychange", this.checkGameStatus)
     document.addEventListener('keyup', (event) => {
         if (event.keyCode === 27) {
             // this.popup.show = false;
@@ -238,14 +248,24 @@ export default {
     this.popup.allegiance = true
   },
 
+  // mounted(){
+  //   window.addEventListener('beforeunload', this.quitGame)
+  // },
+
   beforeDestroy(){
     window.removeEventListener('beforeunload', this.leaving)
+    document.removeEventListener("visibilitychange", this.checkGameStatus)
     document.removeEventListener('keyup', (event) => {
         if (event.keyCode === 27) {
             this.popup.show = false;
         }
     });
+    this.quitGame();
   },
+
+  // destroyed(){
+  //   window.removeEventListener('beforeunload', this.quitGame)
+  // },
 
   data () {
     return {
@@ -277,6 +297,10 @@ export default {
       },
 
       game: {
+
+        sync: 0,
+
+        checkStatus: false,
 
         round: 0,
 
@@ -477,14 +501,14 @@ export default {
     },
 
     'currentQuest.vote'(val, oldVal) {
-      // if(val.length === this.players.length && this.popup.vote){
-      if(val.length === 1 && this.popup.vote){
+      if(val.length === this.players.length && this.popup.vote){
+      // if(val.length === 1 && this.popup.vote){
         // add fake votes for testing
-        val.push({ player: 'gil_123', vote: true})
-        val.push({ player: 'gil_123', vote: true})
-        val.push({ player: 'gil_123', vote: true})
-        val.push({ player: 'gil_123', vote: false})
-        val.push({ player: 'gil_123', vote: false})
+        // val.push({ player: 'gil_123', vote: true})
+        // val.push({ player: 'gil_123', vote: true})
+        // val.push({ player: 'gil_123', vote: true})
+        // val.push({ player: 'gil_123', vote: false})
+        // val.push({ player: 'gil_123', vote: false})
 
         this.advanceStage()
         this.shuffle(this.currentQuest.vote)
@@ -494,9 +518,9 @@ export default {
 
     'currentQuest.results'(val) {
       try {
-        if(val.length === 1){
-          this.advanceStage()
-        }
+        // if(val.length === 1){
+        //   this.advanceStage()
+        // }
         if(val.length === this.questPlayerCount){
           this.advanceStage()
         }
@@ -586,7 +610,7 @@ export default {
         endGame = true
       }
       // if one team won by votes
-      if(this.game.knightWins >= 1 || this.game.minionWins >= 3){
+      if(this.game.knightWins >= 3 || this.game.minionWins >= 3){
         endGame = true
       }
       return endGame
@@ -668,6 +692,26 @@ export default {
       'incrementRound',
       'nextLeader'
     ]),
+
+    checkGameStatus(){
+      if(!this.game.checkStatus){
+        // say that we're checking the status
+        this.game.checkStatus = true
+        this.$socket.client.emit('request_game_state', {
+          gameKey: this.gameKey,
+        }, () => {
+          setTimeout(() => {
+            this.game.checkStatus = false
+          }, 3000)
+        })
+      }
+    },
+
+    quitGame(){
+      this.$socket.client.emit('quit_game', {
+        gameKey: this.gameKey
+      })
+    },
 
     selectPlayer(player) {
       this.$store.dispatch('playerSelect', player.userId)
@@ -865,8 +909,14 @@ export default {
       this.popup.show = true
       this.popup.showMenu = true
       this.popup.closeable = true
-    }
+    },
 
+    // quitGame(){
+    //   this.$socket.client.emit('quit_game', {
+    //     gameKey: this.gameKey,
+    //     userId: this.player.userId
+    //   })
+    // },
   }
 }
 </script>

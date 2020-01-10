@@ -41,9 +41,7 @@ export default new Vuex.Store({
 
     leader: ({game, players}) => players[game.leader],
 
-    // isLeader: ({user}, { leader }) => leader.userId === user.id,
-
-    isLeader: ({user}, { leader }) => true,
+    isLeader: ({user}, { leader }) => leader.userId === user.id,
 
     role: (store, { player }) => player.role,
 
@@ -131,13 +129,23 @@ export default new Vuex.Store({
     //
 
     SOCKET_BEGIN_GAME(store, data){
-      store.players = data.players
-      store.game.connected = true
+      Vue.set(store, 'players', data.players)
+      Vue.set(store.game, 'connected', true)
+    },
+
+    SOCKET_PLAYER_LIST(store, data){
+      Vue.set(store, 'players', data.players)
     },
 
     PLAYER_JOINED(store, player) {
       // add new player
-      store.players.push(player)
+      Vue.set(store.players, store.players.length, player)
+    },
+
+    SOCKET_PLAYER_QUIT(store, data) {
+      // remove player
+      let index = store.players.findIndex(player => player.userId === data.userId)
+      Vue.delete(store.players, index)
     },
 
     SOCKET_SEND_GAME_STATE({game, questions, players }, data){
@@ -167,6 +175,7 @@ export default new Vuex.Store({
 
     joinGame({commit}, data){
       commit('START_GAME', { player: data, host: false, connected: false })
+      commit('PLAYER_JOINED', data)
     },
 
     clearPlayerSelections({commit}){

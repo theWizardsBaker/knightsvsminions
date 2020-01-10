@@ -7,21 +7,13 @@
 
 export default {
 
-  name: 'App',
+  name: 'KnightsVsMinions',
 
-  data() {
-  	return {
-      
-  	}
-  }
 }
 </script
 
 <style lang="scss" scoped>
 #app {
   min-height: 100vh;
-  .hero {
-
-  }
 }
 </style>
