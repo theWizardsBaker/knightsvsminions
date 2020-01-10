@@ -185,13 +185,13 @@ io.on('connection', (socket) => {
         gameKey: data.gameKey
       }, (err, doc) => {
         // console.log(doc, doc.players.length)
-        if(doc && doc.players.length <= 0){
-          db.remove({
-            gameKey: data.gameKey
-          }, {}, () => {
-            console.log('game removed')
-          })
-        }
+        // if(doc && doc.players.length <= 0){
+        //   db.remove({
+        //     gameKey: data.gameKey
+        //   }, {}, () => {
+        //     console.log('game removed')
+        //   })
+        // }
         socket.to(data.gameKey).emit('player_quit', data);
       });
     });
