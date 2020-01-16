@@ -623,6 +623,7 @@ export default {
       this.$set(this.currentQuest, 'leader', JSON.parse(JSON.stringify(this.leader)))
       this.$set(this.currentQuest, 'team', data.team)
       this.advanceStage()
+      this.game.sync++
     },
 
     player_vote(data){
@@ -630,6 +631,7 @@ export default {
         player: data.player,
         vote: data.decision
       })
+      this.game.sync++
     },
 
     picks_revealed(){
@@ -645,6 +647,7 @@ export default {
         this.display.picks = true
         this.tallyVoteResutls()
       })
+      this.game.sync++
     },
 
     team_vote(data){
@@ -664,6 +667,7 @@ export default {
         // move forward with the mission
         this.advanceStage()
       }
+      this.game.sync++
     },
 
     quest_outcome(data){
@@ -671,6 +675,7 @@ export default {
         success: data.quest === 'success',
         reveal: false
       })
+      this.game.sync++
     },
 
     quest_reveal(data){
@@ -682,6 +687,7 @@ export default {
       }
       this.display.questResults = false
       this.display.questEnd = true
+      this.game.sync++
     },
 
   },
@@ -699,6 +705,7 @@ export default {
         this.game.checkStatus = true
         this.$socket.client.emit('request_game_state', {
           gameKey: this.gameKey,
+          sync: this.game.sync
         }, () => {
           setTimeout(() => {
             this.game.checkStatus = false

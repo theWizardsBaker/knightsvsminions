@@ -41,7 +41,7 @@ if(process.env.NODE_ENV === 'production'){
 generateId = () => {
   let number = Math.random()
   // replace commonly mis-read characters
-  return (number.toString(36).substr(2, 5)).replace("o", "0").replace("i", "1").replace("l", "2").toUpperCase()
+  return (number.toString(36).substr(2, 5)).replace("0", "O").replace("i", "1").replace("l", "2").toUpperCase()
 }
 
 generateUserId = (name) => {
@@ -73,9 +73,9 @@ io.on('connection', (socket) => {
 
   socket.on('create_game', (data, callback) => {
     // create unique room key
-    let gameKey = generateId()
+    let gameKey = generateId();
     // create unique user id
-    let userId = generateUserId(data.name)
+    let userId = generateUserId(data.name);
     db.insert({
       inGame: false,
       gameKey: gameKey.toUpperCase(),
@@ -181,9 +181,9 @@ io.on('connection', (socket) => {
       }
     },
     (err, result) => {
-      db.findOne({
-        gameKey: data.gameKey
-      }, (err, doc) => {
+      // db.findOne({
+      //   gameKey: data.gameKey
+      // }, (err, doc) => {
         // console.log(doc, doc.players.length)
         // if(doc && doc.players.length <= 0){
         //   db.remove({
@@ -193,7 +193,7 @@ io.on('connection', (socket) => {
         //   })
         // }
         socket.to(data.gameKey).emit('player_quit', data);
-      });
+      // });
     });
   });
 
@@ -233,6 +233,7 @@ io.on('connection', (socket) => {
     }, (err, doc) => {
       // if we found it
       if(doc){
+        console.log(data.sync, doc.gameEvents.length)
         // if we've missed messages
         if(data.sync < doc.gameEvents.length){
           // go through each one and send them
@@ -241,6 +242,7 @@ io.on('connection', (socket) => {
             // socket.emit(doc.gameEvents[i].message, doc.gameEvents[i].data)
             (function looper(i){
               setTimeout(() => {
+                console.log("EMIT", doc.gameEvents[i].message, doc.gameEvents[i].data)
                 socket.emit(doc.gameEvents[i].message, doc.gameEvents[i].data);
                 if (--i) {
                   looper(i);
