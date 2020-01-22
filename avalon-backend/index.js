@@ -17,7 +17,7 @@ const io = require('socket.io')(http, {
   allowUpgrades: true,
   httpCompression: true,
   origins: '*:*',
-  pingTimeout: 60000,
+  pingTimeout: 900000,
   transports: ['websocket', 'polling']
   // resource: '/avalon/socket.io'
   // path: process.env.NODE_ENV === 'production' ? '/software/knightsvsminions/socket.io' : '/socket.io'
